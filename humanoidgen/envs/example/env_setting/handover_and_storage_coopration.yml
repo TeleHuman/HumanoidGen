@@ -1,0 +1,6 @@
+use_random_range: True
+random_range: [-0.01,0.01,0,0]
+use_random_angle: False
+random_angle: [-15,15]
+use_default_angle: True
+default_angle: 0

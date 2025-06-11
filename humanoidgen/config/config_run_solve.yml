@@ -1,0 +1,59 @@
+code_id: run_solve            # Unique identifier for the code
+env_id: block_handover
+max_init_scene_num: 10   # Maximum number of steps to initialize the scene
+# run_solve specofic settings
+solve_folder: block_handover
+debug_key_frame: false
+show_key_points: false
+max_episodes: 10
+exe_until_max_episodes_success: true
+
+# maniskill specific settings
+obs_mode: null
+reward_mode: null
+control_mode: pd_joint_pos
+render_mode: human
+shader: default # default, rt
+num_envs: 1
+sim_backend: auto
+enable_shadow: true
+parallel_in_single_scene: false
+
+camera_config:
+  L515:
+    fovy: 54
+    w: 960
+    h: 540
+
+  D435:
+    fovy: 80
+    w: 320
+    h: 240
+
+  D435i:
+    fovy: 80
+    w: 640
+    h: 480
+
+default:
+  env_seed: 0         
+  render_scene: true
+  random_scene: true              
+  random_once: false              
+  record_data: true              
+  calculate_success_rate: true
+  # initialize scene step parameters
+  init_scene: true  
+  init_scene_step_num: 40
+  # end scene step parameters
+  end_scene: true
+  end_scene_step_num: 20
+  # 
+  save_video: true
+  save_when_fail: false
+  record_env_name: ""            
+  record_freq: 10                 
+  pcd_crop: true                  
+  head_camera_type: D435
+  front_camera_type: L515
+  pcd_down_sample_num: 1024

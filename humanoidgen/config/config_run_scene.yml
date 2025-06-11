@@ -1,0 +1,49 @@
+code_id: run_scene      # Unique identifier for the code
+env_id: block_handover
+
+# maniskill specific settings
+obs_mode: null
+reward_mode: null
+control_mode: pd_joint_pos
+render_mode: human
+shader: default
+num_envs: 1
+sim_backend: auto
+enable_shadow: true
+parallel_in_single_scene: false
+
+camera_config:
+  L515:
+    fovy: 54
+    w: 960
+    h: 540
+
+  D435:
+    fovy: 80
+    w: 320
+    h: 240
+
+  D435i:
+    fovy: 80
+    w: 640
+    h: 480
+
+default:
+  env_seed: 0         
+  render_scene: true
+  random_scene: true              
+  random_once: false              
+  record_data: false              
+  calculate_success_rate: false
+  # initialize scene parameters
+  init_scene: true  
+  init_scene_step_num: 40
+  # 
+  save_video: true
+  save_when_fail: false
+  record_env_name: ""            
+  record_freq: 10                 
+  pcd_crop: true                  
+  head_camera_type: D435      
+  front_camera_type: L515
+  pcd_down_sample_num: 1024

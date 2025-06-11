@@ -1,1 +1,15 @@
-/local
+local/
+generated/*
+__pycache__/
+_ext
+*.pyc
+*.so
+build/
+dist/
+*.egg-info/
+.vscode/
+videos/
+test/
+*_local/
+datasets/
+assets/
