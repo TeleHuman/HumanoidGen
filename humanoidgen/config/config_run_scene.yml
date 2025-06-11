@@ -5,7 +5,7 @@ env_id: block_handover
 obs_mode: null
 reward_mode: null
 control_mode: pd_joint_pos
-render_mode: human
+render_mode: auto # auto, human, rgb_array
 shader: default
 num_envs: 1
 sim_backend: auto
@@ -23,11 +23,6 @@ camera_config:
     w: 320
     h: 240
 
-  D435i:
-    fovy: 80
-    w: 640
-    h: 480
-
 default:
   env_seed: 0         
   render_scene: true
@@ -38,6 +33,9 @@ default:
   # initialize scene parameters
   init_scene: true  
   init_scene_step_num: 40
+  # end scene step parameters
+  end_scene: true
+  end_scene_step_num: 20
   # 
   save_video: true
   save_when_fail: false

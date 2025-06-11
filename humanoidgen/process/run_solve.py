@@ -40,6 +40,12 @@ max_episodes = run_config["max_episodes"]
 exe_until_max_episodes_success = run_config["exe_until_max_episodes_success"]
 max_init_scene_num = run_config["max_init_scene_num"]
 
+if run_config["render_mode"] == "auto":
+    if run_config["default"]["render_scene"]:
+        run_config["render_mode"]="human"
+    else:
+        run_config["render_mode"]="rgb_array"
+
 # Originally, the config file is used to set up the environment.
 env_kwargs = dict(
     obs_mode=run_config["obs_mode"],
@@ -85,7 +91,6 @@ def create_planner(env):
         # use_obj_point_cloud=False,
     )
     return planner
-
 
 # 4. run step
 def run_step(solve_folder_path,file_name,planner):

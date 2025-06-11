@@ -24,6 +24,12 @@ args = tyro.cli(Args)
 print(f"Running environment: {args.env_id}")
 run_config.update(vars(args))
 
+if run_config["render_mode"] == "auto":
+    if run_config["default"]["render_scene"]:
+        run_config["render_mode"]="human"
+    else:
+        run_config["render_mode"]="rgb_array"
+
 # Originally, the config file is used to set up the environment.
 env_kwargs = dict(
     obs_mode=run_config["obs_mode"],

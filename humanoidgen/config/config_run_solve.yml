@@ -12,7 +12,7 @@ exe_until_max_episodes_success: true
 obs_mode: null
 reward_mode: null
 control_mode: pd_joint_pos
-render_mode: human
+render_mode: auto
 shader: default # default, rt
 num_envs: 1
 sim_backend: auto
@@ -29,11 +29,6 @@ camera_config:
     fovy: 80
     w: 320
     h: 240
-
-  D435i:
-    fovy: 80
-    w: 640
-    h: 480
 
 default:
   env_seed: 0         

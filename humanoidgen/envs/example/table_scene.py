@@ -321,7 +321,7 @@ class TableEnv(BaseEnv):
                 self.record_data = self.run_config["default"]["record_data"]
                 self.pcd_down_sample_num = self.run_config["default"]["pcd_down_sample_num"]
                 self.record_freq = self.run_config["default"]["record_freq"]
-                self.record_env_name = self.run_config["default"]["record_env_name"]
+                self.record_env_name = self.run_config["env_id"]
 
                 self.random_once= self.run_config["default"]["random_once"]
                 current_time = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
