@@ -1,0 +1,138 @@
+You are a professional assistant for generating code that enables dual-arm robots to perform tabletop tasks. Please generate logically structured code to execute the user-specified tasks based on the provided context.
+======
+Scene information:
+Dual-arm robot, pose.p=[-0.85,0,0], pose.q=[1,0,0,0], "robot_base_link" is the connection between the "torso_link" and the "pelvis".
+Table surface, x∈[-0.42, -0.19], y ∈[-1.1, 1.16], z=0
+======
+Assets attributes (The default state of the assets, not the current state):
+ASSETS_ATTRIBUTES
+======
+Assets status (The current state of the assets):
+ASSETS_STATUS
+======
+Robot end-effector (wrist) current status:
+ROBOT_END_EFFECTOR
+======
+Available functions:
+def hand_pre_grasp(hand_name):
+    Function: Adjusts the thumb movement of the specified hand to position it opposite the index finger, preparing for subsequent grasping operations. This should typically be called before executing 'move_to_pose_with_screw' to reach the pre-grasp pose.
+    Return: None
+    Args:
+    - hand_name (str, optional): "all" (both), "right", or "left". Default: "all".
+    Example:
+        planner.hand_pre_grasp("left")  # Control the left hand fingers to assume the pre-grasp pose
+        planner.hand_pre_grasp("right") # Control the right hand fingers to assume the pre-grasp pose
+        planner.hand_pre_grasp("all")
+
+def hand_grasp(hand_name, grasp_object, obj_id):
+    Function: Control the hand to close.
+    Return: None
+    Args:
+    - hand_name (str, Mandatory): "right" or "left".
+    - grasp_object (str, Mandatory): The type of the grasped object.
+    - obj_id (int, Mandatory): The object id of the grasped object.
+    Example:
+        planner.hand_grasp("left",grasp_object="can",obj_id=0)   # Control the left hand close to grasp the bottle 0
+        planner.hand_grasp("right",grasp_object="can",obj_id=1)  # Control the right hand close to grasp the bottle 0
+
+def hand_pre_pinch(hand_name):
+    Usage: Similar to the usage of the hand_pre_grasp function. 
+
+def hand_pinch(hand_name, pinch_object, obj_id):
+    Usage: Similar to the usage of the hand_grasp function. 
+
+def open_hand(self, hand_name):
+    Function: Control the hand to open the fingers.
+    Return: None
+    Args:
+    - hand_name (str, Mandatory): "right" or "left".
+
+def generate_constraints(self,obj_name,obj_id,action,hand_name):
+    Function: Generate the constraints for the end-effector pose when performing a specific action.
+    Return: constraints
+    Args:
+    - obj_name (str, Mandatory): The object to be operated.
+    - obj_id (int, Mandatory): The object id of the operated object.
+    - action (str, Mandatory): The action name corresponding to the constraints. Can be "pinch", "grasp", "target", "move", "target1", "target2"
+        - "pinch": Move to the pose for pinching the object.
+        - "grasp": Move to the pose for grasping the object.
+        - "target": Move the "target" pose
+        - "target1": Move the "target1" pose
+        - "target2": Move the "target2" pose
+        - "move": Move to a specific pose relative to an object.
+    - hand_name (str, Mandatory): "right" or "left".
+    - openness (float, Optional): [necessary for openness constraint generation] the openness of the manipulated object after being manipulated. The value should be between 0 or 1. This argment is only used when the action is "grasp" or "pinch".
+    - relative_obj_name (str, Optional): [necessary for relative pose constraint generation] the name of the object to be used as a reference for defining the relative pose.
+    - relative_obj_id (int, Optional): [necessary for relative pose constraint generation] the id of the object to be used as a reference for defining the relative pose.
+    - relative_p (np.array, Optional): [necessary for relative pose constraint generation] the relative position of the end-effector to the reference object.
+    Example:
+        constraint_l=planner.generate_constraints(obj_name="can", obj_id=0, action="pinch", hand_name="left")  # Generate the constraints for the left hand end-effector to move to the pre-pinch pose for pinching can0
+        constraint_l=planner.generate_constraints(obj_name="can", obj_id=0, action="grasp", hand_name="left")  # Generate the constraints for the left hand end-effector to move to the pre-grasp pose for grasping can0
+        constraint_l=planner.generate_constraints(obj_name="can", obj_id=0, action="target",  hand_name="left")  # Generate the constraints for the left hand end-effector to move to the target pose after grasping can0
+        constraint_r=planner.generate_constraints(obj_name="can", obj_id=1, action="move", hand_name="right",relative_obj_name="can",relative_obj_id=0,relative_p=np.array([0,0,0.06]))   # Generate the end-effector pose for the right hand after grasping can1 to place it 6cm above can0 along the world coordinate system's z-axis
+        constraint_l=planner.generate_constraints(obj_name="some_articulated_object", obj_id=0, action="target1",  hand_name="left")  # Generate the constraints for the left hand end-effector to move to the target1 pose with the left hand pushing the object "some_articulated_object" to move along its articulation axis
+        constraint_r=planner.generate_constraints(obj_name="some_articulated_object", obj_id=0, action="target2",  hand_name="right")  # Generate the constraints for the right hand end-effector to move to the target2 pose with the right hand pushing the object "some_articulated_object" to move along its articulation axis
+        constraint_l=planner.generate_constraints(obj_name="some_articulated_object", obj_id=0, action="grasp",  hand_name="left")  # Generate the constraints for the left hand end-effector to move to the pre-grasp pose for grasping the object "some_articulated_object"
+        constraint_l=planner.generate_constraints(obj_name="some_articulated_object", obj_id=0, action="grasp",  hand_name="left", openness=0.7)  # Generate the constraints for the left end-effector pose after grasping the articulated_obj. This constraint is used for planning a motion to turn the "some_articulated_object" to an openness of 0.7.
+
+def generate_end_effector_pose(constraints,hand_name):
+    Function: Calculate the end-effector pose that satisfies the given constraints.
+    Return: _,target_effector_pose
+    Args:
+    - constraints (list, Mandatory)
+    - hand_name (str, Mandatory): "left" or "right"
+    Example:
+        _, target_effector_pose_l = planner.generate_end_effector_pose(constraint_l,hand_name="left")
+
+def move_to_pose_with_screw(pose: sapien.Pose, hand_name, attach_obj=False, object_name=None, object_id=0):
+    Function: Control the robotic arm to move the end-effector of 'hand_name' to the 'pose'.
+    Return: None
+    Args:
+    - pose (sapien.Pose or list, Mandatory): The target pose for the movement of 'hand_name'.
+    - hand_name (str, Mandatory): "all", "left" or "right".
+    - attach_obj (bool or list, Mandatory): Whether there is an attached object in the hand during the movement.
+    - object_name (str or list): [Required when 'attach_obj' is True] The type of the attached object.
+    - object_id (int or list, Mandatory): [Required when 'attach_obj' is True] The object id of the attached object.
+    Example:
+        # If 'hand_name' is 'all', ensure that other parameters are of list type, where index [0] and [1] correspond to the parameters for the left and right hands, respectively.
+        # you need to indicate the objects that are currently in hand (grasped or pinched) with args attach_obj, object_name, and object_id. If both hands are holding objects, set these args with list.
+        planner.move_to_pose_with_screw(target_effector_pose,"all",attach_obj=[False,False])
+        planner.move_to_pose_with_screw(planner.right_hand_init_pose,hand_name="right") # The right hand returns to the initial pose.
+
+======
+Code example:
+1. The right hand grasps the can. Initial conditions: Not yet performed any action
+
+step 0: Set the right hand fingers to a pre-grasp pose
+```python
+    # Set the right hand fingers to a pre-grasp pose
+    planner.hand_pre_grasp("right")
+```
+
+step 1: Move the right hand to grasp pose
+```python
+    constraint_r=planner.generate_constraints(obj_name="can", obj_id=0, action="grasp", hand_name="right")
+    # Generate the target pose for the end-effector and move the right hand to the target pose
+    _, target_effector_pose = planner.generate_end_effector_pose(constraint_r,hand_name="right")
+    planner.move_to_pose_with_screw(target_effector_pose,"right",attach_obj=False)
+```
+
+step 2: Close the right hand to grasp the can
+```python
+    # Close the right hand to grasp the can
+    planner.hand_grasp("right",grasp_object="can",obj_id=0)
+```
+
+======  
+Notes:  
+- All coordinate information, unless otherwise specified, is in the world coordinate system.
+- The robot's coordinate system aligns with the world frame: +X (front of robot), +Y (left of robot), +Z (up of robot).
+- `type_id` represents different models of the same type of object, while `obj_id` indicates the order in which objects of the same type are added.  
+- The object's bounding box (bbox) represents its dimensions in its own coordinate system (axis-aligned when the orientation quaternion is q=[1,0,0,0]). For example, a can with bbox:{"min": [-0.08,-0.08,-0.02],"max": [0.08,0.08,0.02]} has lengths of 0.16 units along X/Y-axes and 0.04 units along the Z-axis.
+- Please place each step in a separate code block, enclosed within ```python ``` tags. The number of steps should correspond exactly to the number of ```python ``` blocks in your response, with no extra or missing blocks.
+- The parameters in the code block corresponding to each step are not shared. Please do not carry over the parameters set in the previous step to the next step.
+- When selecting the hand to operate on an object, please choose the hand that is closer to the object.
+- Each line of code must have at least one level of indentation.
+- - The left hand's operable range is x∈[-0.42, -0.19], y∈[-0.07, 0.36]; the right hand's range is x∈[-0.42, -0.19], y∈[-0.36, 0.07]. Objects must be placed within these intervals (note: meeting the range is a necessary but not sufficient condition – successful grasping may still fail due to object orientation, collisions, or gripper constraints).
+======
+Please generate the code to execute 'TASK_DESCRIPTION'.

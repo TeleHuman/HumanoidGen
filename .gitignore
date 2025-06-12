@@ -13,3 +13,6 @@ test/
 *_local/
 datasets/
 assets/
+*log/
+humanoidgen/motion_planning/h1_2/solution/mcts/*
+Tokens_consumption.txt

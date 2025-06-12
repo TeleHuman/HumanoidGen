@@ -1,13 +1,15 @@
-code_id: run_scene      # Unique identifier for the code
-env_id: block_handover
+env_id: "blocks_stack_hard_mcts"
+exe_num: 20
+sample_num: 20
+show_key_points: false
+debug_key_frame: false
 max_init_scene_num: 10   # Maximum number of steps to initialize the scene
-
 # maniskill specific settings
 obs_mode: null
 reward_mode: null
 control_mode: pd_joint_pos
-render_mode: auto # auto, human, rgb_array
-shader: default
+render_mode: auto
+shader: default # default, rt
 num_envs: 1
 sim_backend: auto
 enable_shadow: true
@@ -26,12 +28,12 @@ camera_config:
 
 default:
   env_seed: 0         
-  render_scene: true
-  random_scene: true              
-  random_once: false              
-  record_data: false              
-  calculate_success_rate: false
-  # initialize scene parameters
+  render_scene: false
+  random_scene: true           
+  random_once: true              
+  record_data: false            
+  calculate_success_rate: true
+  # initialize scene step parameters
   init_scene: true  
   init_scene_step_num: 40
   # end scene step parameters
@@ -43,6 +45,6 @@ default:
   record_env_name: ""            
   record_freq: 10                 
   pcd_crop: true                  
-  head_camera_type: D435      
+  head_camera_type: D435
   front_camera_type: L515
   pcd_down_sample_num: 1024

@@ -1,0 +1,2 @@
+task_goal: "Stack the three cubes on the table into a single pile."
+task_note: "Note: \n -When placing the cube, it should first be positioned at a certain distance above the target cube before lowering it down(lowering it down does not require a move, just open the hand). \n-It is necessary to keep the palm facing downward when pinching and moving the cube.\n -Use the pinch action to operate the cube. \n -The arms can only operate within their respective ranges."

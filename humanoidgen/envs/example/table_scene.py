@@ -300,6 +300,8 @@ class TableEnv(BaseEnv):
                 # initialize scene parameters
                 self.init_scene = self.run_config["default"]["init_scene"]
                 self.init_scene_step_num = self.run_config["default"]["init_scene_step_num"]
+                self.max_init_scene_num = self.run_config["max_init_scene_num"]
+                
                 # end scene parameters
                 self.end_scene = self.run_config["default"]["end_scene"]
                 self.end_scene_step_num = self.run_config["default"]["end_scene_step_num"]
@@ -1913,38 +1915,13 @@ class TableSetting(TableEnv):
     ######## mcts #########
     # 重置场景(运行一定的step使得场景稳定)，判断场景是否初始化成功
     def init_task_scene(self):
-        # 重置场景
-        self.reset(seed=0)
-        init_scene_step=50
-        for i in range(init_scene_step):
-            self.render()
-            defalt_pose = self.agent.robot.get_qpos()[0, :38].cpu().numpy()
-            obs, reward, terminated, truncated, info = self.step(defalt_pose)
-        
-        while True:
-            # 场景是否初始化成功
-            start_task_flag=self.start_task()
-            if start_task_flag == True:
+        start_result = False
+        for i in range(self.max_init_scene_num):
+            start_result=self.start_task()
+            if start_result:
                 break
-            else:
-                self.reset(seed=0)
-                init_scene_step=50
-                for i in range(init_scene_step):
-                    self.render()
-                    defalt_pose = self.agent.robot.get_qpos()[0, :38].cpu().numpy()
-                    obs, reward, terminated, truncated, info = self.step(defalt_pose)
-
-    # def get_scene_info(self):
-    #     scene_info = {
-    #         "scene_name": self.scene_name,
-    #         "scene_scale": self.kitchen_scene_scale,
-    #         "scene_objects": {
-    #             "bowl": self.bowl,
-    #             "apple": self.apple,
-    #             # "can": self.can,
-    #         },
-    #     }
-    #     return scene_info
+        if not start_result:
+            raise RuntimeError(f"Failed to start task after {self.max_init_scene_num} attempts.")        
 
     # 获取所有物体的位置信息
     def get_asset_state(self):

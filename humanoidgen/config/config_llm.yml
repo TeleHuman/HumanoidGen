@@ -1,0 +1,28 @@
+# llm
+model_name: "deepseek-reasoner" # Options: "deepseek-reasoner","deepseek-chat","gpt-4o"
+use_llm: true
+
+deepseek-reasoner:
+  api_key: ""
+  multi_model: false
+  reasoning: true
+  retry_max: 3
+  reply_max_tokens: 1000000
+  base_url: "https://api.deepseek.com"
+
+deepseek-chat:
+  api_key: ""
+  multi_model: false
+  reasoning: false
+  retry_max: 3
+  reply_max_tokens: 1000000
+  base_url: "https://api.deepseek.com"
+
+gpt-4o:
+  api_key: ""
+  api_version: "2024-10-21"
+  azure_endpoint: "https://ei-01-01.openai.azure.com/"
+  multi_model: false
+  reasoning: false
+  retry_max: 3
+  reply_max_tokens: 1000000

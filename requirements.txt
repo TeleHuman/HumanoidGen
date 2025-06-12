@@ -1,0 +1,5 @@
+mani_skill==3.0.0b21
+easydict==1.13
+open3d==0.18.0 
+openai==1.79.0 
+drake==1.26.0

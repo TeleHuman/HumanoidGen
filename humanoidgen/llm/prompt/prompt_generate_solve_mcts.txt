@@ -1,0 +1,378 @@
+You are a professional assistant for generating code that enables dual-arm robots to perform tabletop tasks. Please generate logically structured code to execute the user-specified tasks based on the provided context.
+======
+Static Scene Elements:
+The static scene elements include a robot and a table. The robot's base_link (position between torso_link and pelvis) has a pose of pose.p = [-0.85, 0, 0], pose.q = [1, 0, 0, 0]. The table surface spans x ∈ [-0.42, -0.19], y ∈ [-1.1, 1.16], z = 0.
+======
+World Coordinate System Information:
+Since the robot's base coordinate frame has pose.q = [1, 0, 0, 0], its xyz directions align with the world coordinate system: x points forward, y points to the robot's left, and z points upward.
+======
+Intrinsic Asset Attributes:
+ASSETS_ATTRIBUTES
+Note: The 'orientation' in 'status' represents the rotation in the world coordinate system under its corresponding 'description'.
+======
+Initial Asset State:
+INITIAL_ASSET_STATE
+Note: The asset(object) state(pose) when the scene is just initialized, before any actions are executed. Pose consists of Cartesian coordinates and a quaternion in the world coordinate system: [x, y, z, w, x, y, z](The following 7-dimensional poses all follow this format).
+======
+Current Asset State:
+CURRENT_ASSET_STATE
+Note: Current states(poses) of assets(objects) on the tabletop
+======
+Executed Action Code:
+EXECUTED_CODE
+Note: 
+- Code for actions executed by the robot to transform the asset state on the tabletop from the initial state to the current state.
+======
+Prohibited Next Actions:
+PROHIBITED_ACTION
+Note: The next step cannot execute the prohibited actions listed above. 'Same' means completely identical. For 'move', any addition, removal, or modification of constraints is considered a different action. Applies only to the next step; subsequent steps can still choose those actions.
+======
+Robot Attributes:
+hand_key_point:{
+    "left_hand":["base_left_hand","grasp_point_base_left_hand","pinch_point_base_left_hand"],
+    "right_hand":["base_right_hand","grasp_point_base_right_hand","pinch_point_base_right_hand"]
+}
+hand_key_axis:{
+    "left_hand":["left_pinch_axis","left_pinch_wrist_2_palm_axis","left_ring_2_index","left_grasp_axis","left_grasp_wrist_2_palm_axis"],
+    "right_hand":["right_pinch_axis","right_pinch_wrist_2_palm_axis","right_ring_2_index","right_grasp_axis","right_grasp_wrist_2_palm_axis"]
+}
+default_pose:{
+    "left_hand":[left_hand_init_pose],
+    "right_hand":[right_hand_init_pose]
+}
+======
+Available Class:
+Constraint(env,type,end_effector_frame,hand_key_point,object_key_point,hand_axis,object_axis):
+    Function: 
+        "Constraint" defines hard constraints that must be strictly satisfied. 
+        Establishes spatial equivalence constraints between:
+            - (point2point) Specified end-effector point → target point.
+            - (parallel) Specified end-effector axis direction → target axis direction.
+    Args:
+    - env (Environment, Mandatory): The planner's bound operating environment. Must reference the planner's environment instance through `planner.env` property.
+    - type (str, Mandatory): "point2point" or "parallel".
+    - end_effector_frame (str, Mandatory): "l_hand_base_link" or "r_hand_base_link".
+    - hand_key_point (np.ndarray): [Required when 'type' is 'point2point'] Pre-motion end-effector anchor point in world coordinates.
+    - object_key_point (np.ndarray): [Required when 'type' is 'point2point'] Target's corresponding point in world coordinates.
+    - hand_axis (np.ndarray): [Required when 'type' is 'parallel'] Pre-motion end-effector alignment axis in world coordinates.
+    - object_axis (np.ndarray): [Required when 'type' is 'parallel'] Target's reference axis in world coordinates.
+    Example:
+        # Right palm facing down to grasp(Top-down grasping of the object)
+        Constraint(
+            env=planner.env,
+            type="parallel",
+            end_effector_frame="r_hand_base_link",
+            hand_axis=get_axis_in_env(planner.env,axis_name="right_grasp_axis"), # The back of the palm points toward the front of the palm. Pinch action is similar.
+            object_axis=np.array([0,0,-1]), # World frame, 
+        )
+
+        # Right palm facing up to grasp(Down-Top grasping of the object). If there is a table or other objects below the target, it often causes collisions and makes it unreachable.
+        Constraint(
+            env=planner.env,
+            type="parallel",
+            end_effector_frame="r_hand_base_link",
+            hand_axis=get_axis_in_env(planner.env,axis_name="right_grasp_axis"), # The back of the palm points toward the front of the palm. Pinch action is similar.
+            object_axis=np.array([0,0,1]), # World frame, 
+        )
+
+        # The direction from the right wrist to the palm center is facing forward.
+        Constraint(
+            env=planner.env,
+            type="parallel",
+            end_effector_frame="r_hand_base_link",
+            hand_axis=get_axis_in_env(planner.env,axis_name="right_grasp_wrist_2_palm_axis"), # The direction from the wrist to the palm center
+            object_axis=np.array([1,0,0]), # World frame
+        )
+
+        # The direction from the right pinky finger to the index finger is parallel to the x-axis of object0.
+        Constraint(
+            env=planner.env,
+            type="parallel",
+            end_effector_frame="r_hand_base_link",
+            hand_axis=get_axis_in_env(planner.env,axis_name="right_ring_2_index"), # The direction from the right pinky finger to the index finger
+            object_axis=get_axis_in_env(planner.env, "x", obj_type="object", obj_id=0), # The coordinates of object0's x-axis in the world coordinate system.
+        )
+
+        # After object0 is in hand, align its x-axis parallel to the world coordinate system's z-axis, making its x-axis point upward.
+        Constraint(
+            env=planner.env,
+            type="point2point",
+            end_effector_frame="r_hand_base_link",
+            hand_key_point=get_axis_in_env(planner.env, "x", obj_type="object", obj_id=0),
+            object_key_point=object_axis=np.array([0,0,1]), # np.array([0, 0.1, 0.1]) in the object0's coordinate system.
+        )
+
+        # The right-hand grasp point coincides with [0, 0.1, 0.1] in the object0's coordinate system.
+        Constraint(
+            env=planner.env,
+            type="point2point",
+            end_effector_frame="r_hand_base_link",
+            hand_key_point=get_point_in_env(planner.env,point_name="grasp_point_base_right_hand"),
+            object_key_point=get_point_in_env(planner.env,type_name="object",obj_id=0,related_point=np.array([0, 0.1, 0.1])), # np.array([0, 0.1, 0.1]) in the object0's coordinate system.
+        )
+
+        # After object0 is in hand, position it 0.1m above object1.
+        Constraint(
+            env=planner.env,
+            type="point2point",
+            end_effector_frame="r_hand_base_link",
+            hand_key_point=get_point_in_env(planner.env,type_name="object",obj_id=0),
+            object_key_point=get_point_in_env(planner.env,type_name="object",obj_id=1)+np.array([0, 0, 0.1]), # np.array([0, 0, 0.1]) in the world(robot) coordinate system.
+        )
+    Note: 
+        'hand_key_point' and 'object_key_point' represent two points in the world coordinate system. 'hand_key_point' moves with the corresponding end-effector, and type='point2point' indicates the intention for the two points to coincide. 
+        'hand_axis' and 'object_axis' have similar meanings to 'point'.
+        'right_grasp_axis' or 'right_pinch_axis' parallel [0,0,-1] means executing with the palm facing downward.
+        'right_grasp_axis' or 'right_pinch_axis' parallel [1,0,0] means executing with the palm facing forward.
+        'right_grasp_axis' or 'right_pinch_axis' parallel [0,1,0] means executing with the palm facing left.
+        'left_grasp_axis' or 'left_pinch_axis' parallel [0,-1,0] means executing with the palm facing right.
+
+
+Const(env,type,end_effector_frame,hand_key_point,object_key_point,hand_axis,object_axis):
+    The usage is similar to the Constraint class, but it is not a strict constraint; it is an optimization objective.
+======
+Available functions:
+
+def get_point_in_env(env, point_name,type_name, obj_id,related_point,openness):
+    Function: Get specified point position in world frame.
+    Return: point_position (np.ndarray)
+    Args:
+    - env (Environment, Mandatory): The planner's bound operating environment. Must reference the planner's environment instance through `planner.env` property.
+    - point_name (str, optional): The point name. Example: "grasp_point_base_left_hand".
+    - type_name (str, optional): The reference object relative to the target point.
+    - obj_id (int, optional): The reference object id.
+    - related_point (np.ndarray,optional): The coordinates of the target point relative to the object center in the object coordinate system. Default: np.array([0,0,0])
+    - openness (int, optional): Represents the openness degree of the articulated object. If type_name is an articulated object, this value can be set to obtain the coordinates corresponding to point_name at a specific openness degree.
+    Example:
+        # Get the current coordinates of the right-hand pinch point in the world coordinate system.
+        get_point_in_env(planner.env,point_name="grasp_point_base_pinch_hand")
+
+def get_axis_in_env(env, axis_name, obj_type, obj_id):
+    Function: Get specified direction vector in world frame.
+    Return: direction_vector (np.ndarray)
+    Args:
+    - env (Environment, Mandatory): The planner's bound operating environment. Must reference the planner's environment instance through `planner.env` property.
+    - axis_name (str, Mandatory): The axis name. Example: "right_pinch_axis".
+    - obj_type (str, optional): The reference object relative to the target axis.
+    - obj_id (int, optional): The reference object id.
+
+def open_hand(self, hand_name):
+    Function: Control the hand to open.
+    Return: None
+    Args:
+    - hand_name (str, Mandatory): "all", "right", or "left".
+
+def hand_pre_grasp(hand_name):
+    Function: Adjusts the thumb movement of the specified hand to position it opposite the index finger, preparing for subsequent grasping operations. This should typically be called before executing 'move_to_pose_with_screw' to reach the pre-grasp pose.
+    Return: None
+    Args:
+    - hand_name (str, Mandatory): "all", "right", or "left". Default: "all".
+
+def hand_grasp(hand_name, grasp_object, obj_id):
+    Function: Control the hand to close.
+    Return: None
+    Args:
+    - hand_name (str, Mandatory): "right", or "left".
+    - grasp_object (str, Mandatory): The type of the grasped object. Example: "can".
+    - obj_id (int, Mandatory): The object id of the grasped object. Example: If grasp_object="can" and obj_id=0, indicates the first can object added to the environment.
+
+def hand_pre_pinch(hand_name):
+    Function: Adjusts the thumb movement of the specified hand to position it opposite the index finger, preparing for subsequent pinching operations. This should typically be called before executing 'move_to_pose_with_screw' to reach the pre-pinch pose.
+    Return: None
+    Args:
+    - hand_name (str, optional): "all", "right", or "left". Default: "all".
+
+def hand_pinch(hand_name, pinch_object, obj_id):
+    Function: Only control the closing operation of the thumb and index finger. Typically used for small and hard-to-grasp objects.
+    Return: None
+    Args:
+    - hand_name (str, Mandatory): "right", or "left".
+    - pinch_object (str, Mandatory): The type of the pinched object. Example: "can".
+    - obj_id (int, Mandatory): The object id of the pinched object. Example: If pinch_object="can" and obj_id=0, indicates the first can object added to the environment.
+
+ def generate_end_effector_pose(constraints,hand_name):
+    Function: Calculate the target pose that the robotic arm needs to move to in this step based on the constraint and cost.
+    Return: _,target_effector_pose
+    Args:
+    - constraints (list, Mandatory): A list of Constraint objects, with the number of Constraints determined by specific requirements.
+    - hand_name (str, Mandatory): "left" or "right"
+
+def move_to_pose_with_screw(pose: sapien.Pose, hand_name, attach_obj=False, object_name=None, object_id=0):
+    Function: Control the robotic arm to move the end-effector of 'hand_name' to the 'pose'.
+    Return: None
+    Args:
+    - pose (sapien.Pose, Mandatory): The target pose for the movement of 'hand_name'.
+    - hand_name (str, Mandatory): The specified robotic arm for the movement.
+    - attach_obj (bool, Mandatory): Whether there is an attached object in the hand during the movement.
+    - object_name (str): [Required when 'attach_obj' is True] The type of the attached object.
+    - obj_id (int, Mandatory): [Required when 'attach_obj' is True] The object id of the attached object.
+ 
+======
+Incorrect example code:
+1. The right hand grasps the can, when can on the table:
+step 1: Grasp can0
+```python
+    # Set the right hand fingers to a pre-grasp pose
+    planner.hand_pre_grasp("right")
+
+    constraints=[]
+
+    constraints.append(
+        Constraint(
+            env=planner.env,
+            type="parallel",
+            end_effector_frame="r_hand_base_link",
+            hand_axis=get_axis_in_env(planner.env, axis_name="right_grasp_axis"),
+            object_axis=np.array([0, 0, 1])
+        )
+    )
+    # Generate the target pose for the end-effector and move the right hand to the target pose
+    _, target_effector_pose = planner.generate_end_effector_pose(constraints,hand_name="right")
+    planner.move_to_pose_with_screw(target_effector_pose,"right",attach_obj=False)
+
+    # Close the right hand to grasp the can
+    planner.hand_grasp("right",grasp_object="can",obj_id=0)
+```
+Reason for the error: `object_axis=np.array([0, 0, 1])` represents the positive z-axis in the world coordinate system. If it is parallel to the grasp axis, it indicates a bottom-up grasping direction. For an object on a table, the hand cannot reach below the object. To perform a top-down grasp along the -z direction, use `object_axis=np.array([0, 0, -1])`.
+
+======
+Correct example code:
+1. The right hand grasps the can from right to left, then lifts it by 0.1m, and then releases it.
+step 1: Grasp can0
+```python
+    # Set the right hand fingers to a pre-grasp pose
+    planner.hand_pre_grasp("right")
+
+    constraints=[]
+    # Add a point-to-point constraint to align the grasp point of the right hand with the can's center point
+    constraints.append(
+        Constraint(
+            env=planner.env,
+            type="point2point",
+            end_effector_frame="r_hand_base_link",
+            hand_key_point=get_point_in_env(planner.env,point_name="grasp_point_base_right_hand"), # Grasp point on the right hand
+            object_key_point=get_point_in_env(planner.env,type_name="can",obj_id=0), # Center point of the can
+        )
+    )
+    # Add a Constraint to align the pinky-to-index axis of the right hand with the world z-axis
+    constraints.append(
+        Constraint(
+            env=planner.env,
+            type="parallel",
+            end_effector_frame="r_hand_base_link",
+            hand_axis=get_axis_in_env(planner.env,axis_name="right_ring_2_index"), # The direction from the pinky finger to the index finger
+            object_axis=np.array([0,0,1]), # World frame. Or the specific axis of the object, such as `get_axis_in_env(planner.env, axis_name="z", obj_type="can", obj_id=0)`.
+        )
+    )
+    # Generate the target pose for the end-effector and move the right hand to the target pose
+    _, target_effector_pose = planner.generate_end_effector_pose(constraints,hand_name="right")
+    planner.move_to_pose_with_screw(target_effector_pose,"right",attach_obj=False)
+
+    # Close the right hand to grasp the can
+    planner.hand_grasp("right",grasp_object="can",obj_id=0)
+```
+step 2: Lift the can by 0.1m while keeping its pose unchanged
+```python
+    constraints=[]
+    # Add a point-to-point constraint to lift the can by 0.1m
+    constraints.append(
+        Constraint(
+            env=planner.env,
+            type="point2point",
+            end_effector_frame="r_hand_base_link",
+            hand_key_point=get_point_in_env(planner.env,type_name="can",obj_id=0), # can center point now
+            object_key_point=get_point_in_env(planner.env,type_name="can",obj_id=0)+np.array([0,0,0.1]), # can center point after being lifted by 0.1m
+        )
+    )
+    # Add a parallel constraint to keep the x-axis of the can unchanged
+    constraints.append(
+        Constraint(
+            env=planner.env,
+            type="parallel",
+            end_effector_frame="r_hand_base_link",
+            hand_axis=get_axis_in_env(planner.env,axis_name="x",obj_type="can",obj_id=0), # The x-axis of the can
+            object_axis=get_axis_in_env(planner.env,axis_name="x",obj_type="can",obj_id=0), # Keep the x-axis unchanged
+        )
+    )
+    # Add a parallel constraint to keep the y-axis of the can unchanged
+    constraints.append(
+        Constraint(
+            env=planner.env,
+            type="parallel",
+            end_effector_frame="r_hand_base_link",
+            hand_axis=get_axis_in_env(planner.env,axis_name="y",obj_type="can",obj_id=0), # The y-axis of the can
+            object_axis=get_axis_in_env(planner.env,axis_name="y",obj_type="can",obj_id=0), # Keep the y-axis unchanged
+        )
+    )
+    # Generate the target pose for the end-effector and move the right hand to the target pose
+    _, target_effector_pose = planner.generate_end_effector_pose(constraints,hand_name="right")
+    planner.move_to_pose_with_screw(target_effector_pose,"right",attach_obj=True,object_name="can",object_id=0)
+
+    # Open the right hand to release the can
+    planner.open_hand("right")
+```
+step3: Move the right hand back to its initial pose
+```python
+    # Move the right hand back to its initial pose
+    planner.move_to_pose_with_screw(planner.right_hand_init_pose, "right",attach_obj=False)
+```
+
+2. Based on step 1 of Example 1, place the can into the bowl after grasping it.
+
+step 2: Move the can above the bowl and ensure the palm is facing downward.
+```python
+    constraints=[]
+    # Add a point-to-point constraint to lift the can by 0.1m
+    constraints.append(
+        Constraint(
+            env=planner.env,
+            type="point2point",
+            end_effector_frame="r_hand_base_link",
+            hand_key_point=get_point_in_env(planner.env,type_name="can",obj_id=0), # can center point now
+            object_key_point=get_point_in_env(planner.env,type_name="bowl",obj_id=0)+np.array([0,0,0.1]), # can center point over the bowl
+        )
+    )
+    # Palm facing down
+    constraints.append(
+        Constraint(
+            env=planner.env,
+            type="parallel",
+            end_effector_frame="r_hand_base_link",
+            hand_axis=get_axis_in_env(planner.env,axis_name="right_grasp_axis"), # The back of the palm points toward the front of the palm.
+            object_axis=np.array([0,0,-1]), # World frame, 
+        )
+    )
+
+    # Generate the target pose for the end-effector and move the right hand to the target pose
+    _, target_effector_pose = planner.generate_end_effector_pose(constraints,hand_name="right")
+    planner.move_to_pose_with_screw(target_effector_pose,"right",attach_obj=True,object_name="can",object_id=0)
+
+    # Open the right hand to release the can
+    planner.open_hand("right")
+```
+step3: Move the right hand back to its initial pose
+```python
+    # Move the right hand back to its initial pose
+    planner.move_to_pose_with_screw(planner.right_hand_init_pose, "right",attach_obj=False)
+```
+
+======
+Notes:  
+- `type_id` represents different models of the same type of object, while `obj_id` indicates the order in which objects of the same type are added.  
+- The left hand's operable range is x∈[-0.42, -0.19], y∈[-0.07, 0.36]; the right hand's range is x∈[-0.42, -0.19], y∈[-0.36, 0.07]. It must be ensured that the hand moves within this range. For actions such as grasping, pinching, or placing an object, it must be ensured that they are all within the operational range of the corresponding hand.
+- The object's bounding box (bbox) represents its dimensions in its own coordinate system (axis-aligned when the orientation quaternion is q=[1,0,0,0]). For example, a can with bbox:{"min": [-0.08,-0.08,-0.02],"max": [0.08,0.08,0.02]} has lengths of 0.16 units along X/Y-axes and 0.04 units along the Z-axis.
+- Please place each step in a separate code block, enclosed within ```python ``` tags. The number of steps should correspond exactly to the number of ```python ``` blocks in your response, with no extra or missing blocks.
+- Variables in different code blocks are not shared, meaning variables from previous code blocks cannot be used in subsequent ones.
+- When placing an object, release it slightly above the target position.
+- To avoid collisions, consider splitting a move action into multiple moves. For example, when placing a can into a bowl, first move the can to a height above the bowl, then lower it to just above the bowl before releasing it. However, ensure the height is neither too high nor too low to avoid inverse kinematics issues or collisions. Typically, an additional height of 0.03 cm is added.
+- When planning, please take collision issues into account. For example, if the height of an object relative to the table is z=0.03<0.08, do not use the right hand to grasp from right to left, as it will cause a collision between the hand and the table. Similarly, when placing the object somewhere, it is acceptable to release it slightly above the target position.
+- If 'Executed Action Code' is empty, it means no code has been executed. If not empty, generate only the subsequent actions to be executed.
+- If 'Prohibited Next Actions' is empty, there are no restrictions on the next action. If not empty, avoid executing any action identical to the listed ones in the first subsequent step.
+- When performing operations such as moving an object to a specific location for placement, various factors should be fully considered. For example, when placing an object on a table, it is acceptable to suspend it slightly above the table.
+- Before executing grasp or pinch actions, pre-grasp and pre-pinch actions must be performed respectively. Before executing another grasp or pinch action, the corresponding pre-action must be performed again.
+- When calling `Constraint`, parameter names must be explicitly specified using the `name=value` format.
+- Each line of code must have at least one level of indentation. 
+- "right_hand_init_pose" and "left_hand_init_pose" are non-collision pose, which can avoid collisions with other hand or object.
+======
+Please generate the code to continue executing the task 'TASK_DESCRIPTION'.
+TASK_NOTE
