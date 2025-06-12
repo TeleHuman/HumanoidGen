@@ -12,8 +12,7 @@ echo "Current directory: $(pwd)"
 ENV_ID=${1:-block_handover}
 SOLVE_FOLDER=${2:-block_handover}
 RENDER=${3:-False}
-SAVE_VIDEO=${4:-True}
 
 # Run the program
 echo "Running program with env_id: $ENV_ID"
-python process/run_solve.py -env "$ENV_ID" -solve "$SOLVE_FOLDER" -render "$RENDER" -video "$SAVE_VIDEO"
+python process/run_solve.py -env "$ENV_ID" -solve "$SOLVE_FOLDER" -render "$RENDER"

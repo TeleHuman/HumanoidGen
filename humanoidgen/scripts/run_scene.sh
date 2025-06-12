@@ -12,7 +12,6 @@ echo "Current directory: $(pwd)"
 # Get environment id from the first argument, default to block_handover
 ENV_ID=${1:-block_handover}
 RENDER=${2:-False}
-SAVE_VIDEO=${3:-True}
 # Run the program
 echo "Running program with env_id: $ENV_ID"
-python process/run_scene.py -env "$ENV_ID" -render "$RENDER" -video "$SAVE_VIDEO"
+python process/run_scene.py -env "$ENV_ID" -render "$RENDER"

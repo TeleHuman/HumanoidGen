@@ -51,24 +51,27 @@ cd humanoidgen
 
 ### 2. Show scnce & Run task
 
-In this project, we provide standard scenes and execution code for 20 tasks, which can be quickly run using the script files below.
+In this project, we provide standard scenes and execution code for 20 tasks, which can be quickly run using the script files below:
 
 ```sh
 bash scripts/run_scene.sh
 bash scripts/run_solve.sh
 ```
 
-In addition, you can specify main parameters either by directly modifying the sh script file or by using the commands below.
+In addition, you can specify main parameters either by directly modifying the sh script file or by using the commands below: 
 
 ```sh
-python process/run_scene.py -env block_handover -render False -video True
-python process/run_solve.py -env block_handover -solve block_handover -render False -video True
+python process/run_scene.py -env block_handover -render False
+python process/run_solve.py -env block_handover -solve block_handover -render False
 ```
 
-In addition to specifying parameters on the command line, you can also run the corresponding Python file by setting the config file. For detailed configuration file parameters, see [**Configuration Instructions**](./CONFIGURATION.md)
+To set more parameters, configure the config file. For details, see [**Configuration Instructions**](./CONFIGURATION.md).
 
-### 2. Data collection & Visualization
+### 3. Data collection & Visualization
 
+To collect data, open the configuration file [config_run_solve.yml](./humanoidgen/config/config_run_solve.yml) and set "record\_data" to true. For example, for task "block\_handover", then run the execution command:
 
-
+```sh
+python process/run_solve.py -env block_handover -solve block_handover -render False
+```
 
