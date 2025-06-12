@@ -1,0 +1,82 @@
+block_handover: Use the right hand to pinch rectangular_cube0, then move it to the
+  target pose (with the right hand attaching the rectangular_cube0). After this,
+  use the left hand to pinch rectangular_cube0. Then open the right hand. Finally,
+  use the left hand to move the rectangular_cube0 to be above the target_cube and
+  then release the left hand.
+blocks_stack_easy: First, use the left hand and the right hand to get cube0 and cube1 in the hands simultaneously. 
+  Then, move the cube0 to the target pose with the left hand. After
+  this, open the left hand and move the left hand to its initial position. Finally,
+  move the cube1 to be 0.07m above the cube0 with the right hand, open the right
+  hand, and move the right hand to its initial position.
+blocks_stack_hard: First, use the left hand and the right hand to get cube0 and
+  cube1 in the hands simultaneously. Then, move the cube0 and cube1 to the target pose.
+  After this, open the left hand and move the left hand to its initial position.
+  Move the right hand to lift the cube1 to be 0.06m above the cube0, and open the right hand. 
+  Use the right hand to get cube2 in the hand, then lift the cube2 to be 6 cm above the cube1. Open the right hand and
+  move the right hand to its initial position
+close_box_easy: First move the right hand to the target1 position. This step does
+  not require right hand's attachment to the box. Then move the right hand to the
+  target2 position. This step requires right hand's attachment to the box.
+close_box_hard: First, use the right hand to grasp the box. Then, with the right
+  hand grasping the box, close the box to an openness of 0.3. This step requires
+  right hand's attachment to the box. Finally, open the right hand.
+close_drawer: First, move the left hand to grasp the drawer. Then, with the left
+  hand attached to the drawer, close the drawer to an openness of 0. Finally, open
+  the left hand.
+close_laptop_easy: First, move the right hand to target 1 pose. This step does not
+  require the right hand's attachment to the laptop. Then move the right hand to
+  target 2 pose to close the laptop. This step requires the right hand's attachment
+  to the laptop.
+close_laptop_hard: First, move the right hand to grasp the laptop. Then, with the
+  right hand attached to the laptop, close the laptop to an openness of 0.3. After
+  this, open the right hand. Then move the right hand to target1 position. Finally,
+  move the right hand to target2 position to push the laptop close, with the right
+  hand attached to the laptop.
+cup_pour_easy: First, grasp the cup with the right hand. Then with the right hand
+  attached to the cup, move the cup to be above the bowl (0.2m in z axis and -0.04m
+  in y axis). Finally, move the right hand to pour the things out of the cup into
+  the bowl, with the right hand attached to the cup.
+dual_bottles_pick_easy: Simultaneously grasp bottle0 and bottle1 with the left and
+  right hands, then lift them to the target position
+dual_bottles_pick_hard: First, use the left hand and the right hand to grasp bottle0
+  and bottle1 simultaneously. Then, lift the two bottles to the target position
+empty_cup_place: Put the cup over the plate.
+handover_and_storage: First, move the left hand to grasp the drawer. Then, open
+  the drawer to an openness of 0.9 with the left hand. Then
+  open the left hand. Use the right hand to pinch rectangular_cube0, then move it
+  to the "target" pose. Use
+  the left hand to pinch rectangular_cube0. Then open the right hand to release the rectangular_cube0 to the left hand. Usd the left
+  hand to move the rectangular_cube0 to be 0.08m in front of, 0.1m above the drawer.
+  Then open the left hand to release the rectangular_cube0. Move the left hand to grasp the drawer. Then, close the
+  drawer to an openness of 0 with the left hand. Finally,
+  open the left hand to release the drawer.
+handover_and_storage_coopration: First, move the left hand to grasp the drawer and
+  move the right hand to pinch the rectangular_cube0 simultaneously. Then, 
+  move the rectangular_cube0 to the “target” pose with the right hand, and open the drawer with the left hand to an openness of 0.9 simultaneously. Open the left hand to release the drawer. Move the left hand to pinch the rectangular_cube0.
+  Then open the right hand to release the rectangular_cube0 to the left hand. Use the left hand to move the rectangular_cube0 to be
+  0.08m in front of, 0.1m above the drawer. Then open the left hand to release the rectangular_cube0. Move the left
+  hand to grasp the drawer. Then, close the drawer to an openness of 0 with the
+  left hand attached to the drawer. Finally, open the left hand.
+open_box_easy: First, move the right hand to the target1 pose. Then, move the right
+  hand to the target 2 pose to open the box, with the right hand attached to the
+  box.
+open_box_hard: First, move the right hand to grasp the box. Then, with the right
+  hand grasping the box, open the box to an openness of 0.8. After this, open the
+  right hand and move the right hand to the target1 position. Finally, with the
+  right hand attached to the box, move the right hand to the target2 position.
+open_drawer: First, move the left hand to grasp the drawer. Then, open the drawer
+  to an openness of 1 with the left hand grasping the drawer. Finally, open the
+  left hand.
+open_laptop_easy: First, move the right hand to target1, then move the right hand to target2 to open the laptop. The right hand is attached to the laptop in the opening process.
+open_laptop_hard: After the right hand grasps the laptop, open it to an openness
+  of 0.55. Then, with right hand attached to the laptop, open the right hand and
+  move it to the target1 position. Finally, with the right hand attached to the
+  laptop, move the right hand to the target2 position.
+pyramid_stack: First, use the left hand and the right hand to respectively pinch
+  cube0 and cube1 simultaneously. Then, move the cube0 to the target pose with the
+  left hand, with the cube0 and the cube1 attached to the left and the right hand, respectively. 
+  Open the left hand and move the left hand to its initial position.
+  Use the right hand to move the cube1 to be -0.04m at the y direction of the cube0.
+  Open the right hand. Then use the right hand to pinch cube2. Use the right hand
+  to move the cube2 to be 0.03m at the y direction, 0.07m at the z direction of
+  the cube1. Open the right hand and move the right hand to its initial position.

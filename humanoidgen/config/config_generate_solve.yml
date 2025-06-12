@@ -1,6 +1,6 @@
-env_id: "blocks_stack_hard_mcts"
+env_id: "block_handover"
 exe_num: 20
-sample_num: 20
+img_prompt: false
 show_key_points: false
 debug_key_frame: false
 max_init_scene_num: 10   # Maximum number of steps to initialize the scene

@@ -22,7 +22,7 @@ gpt-4o:
   api_key: ""
   api_version: "2024-10-21"
   azure_endpoint: "https://ei-01-01.openai.azure.com/"
-  multi_model: false
+  multi_model: true
   reasoning: false
   retry_max: 3
   reply_max_tokens: 1000000

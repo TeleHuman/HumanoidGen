@@ -10,7 +10,7 @@ cd "$SCRIPT_DIR/.."
 echo "Current directory: $(pwd)"
 
 # Get environment id from the first argument, default to open_box_easy
-ENV_ID=${1:-open_box_easy}
+ENV_ID=${1:-block_handover}
 
 # Run the program
 echo "Running program with env_id: $ENV_ID"

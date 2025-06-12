@@ -78,42 +78,16 @@ class UnitreeH1_2UpperBody(BaseAgent):
     )
 
     key_points = dict(
-        # pinch_point_base_right_hand = np.array([-0.07445, -0.145609, -0.0221028]), #for table
-        # right_pinch_axis =  np.array([-1.32008681,-0.57664681,-0.22339487])
-        # [-0.68273579 -1.0233418  -0.31344128]
-        # right_pinch_axis =  np.array([-0.68273579,-1.0233418,-0.31344128])
         # base point
         base_right_hand= np.array([0,0,0]),
         base_left_hand= np.array([0,0,0]),
         # grasp point
-        # grasp_point_base_right_hand = np.array([-0.05045, -0.159809, -0.0281028]),  # default
         grasp_point_base_right_hand = np.array([-0.05845, -0.149809, -0.0281028]),  # default
-
-        # grasp_point_base_left_hand = np.array([-0.05045, -0.159809, -0.0281028]),  #default
-        # grasp_point_base_left_hand = np.array([-0.05045, -0.159809, 0]),  # drawer handler
         grasp_point_base_left_hand = np.array([-0.05845, -0.149809, 0]),  # 418
-        # grasp_point_base_left_hand = np.array([-0.05145, -0.160809, -0.0281028]),
-        # grasp_point_base_right_hand = np.array([-0.05845, -0.165609, -0.0281028]), #for robocasa v1
-        # grasp_point_base_left_hand = np.array([-0.05845, -0.165609, -0.0281028]),
-        # grasp_point_base_right_hand = np.array([-0.07445, -0.145609, -0.0281028]), #for robocasa v1
-        # grasp_point_base_left_hand = np.array([-0.07445, -0.145609, 0.0281028]),
-        # grasp_point_base_left_hand = np.array([-0.0585, -0.14, 0.025]),
-        # grasp_point_base_right_hand = np.array([-0.0485, -0.13, -0.025]), #for robocasa v1
-        # grasp_point_base_right_hand = np.array([-0.0585, -0.14, -0.025]), #for robocasa v1
-        # right_grasp_point_table_exmple = np.array([-0.02824694, -0.14375293, -0.004]), #for table
-        # right_grasp_point = np.array([-0.046824694, -0.14375293, -0.0055310726]),
-        # right_grasp_point = np.array([-0.016824694, -0.14375293, 0.0205310726]), #for robocasa 2.13
-        # right_grasp_point = np.array([-0.02824694, -0.14375293, -0.040]), #for robocasa
-        # right_grasp_point = np.array([-0.016824694, -0.14375293, -0.019310726]), #for table 2.13
-        # right_grasp_point_table_exmple = np.array([-0.016824694, -0.14375293, -0.018310726]), #for table
+
         # pinch point
         pinch_point_base_right_hand = np.array([-0.07445, -0.145609, -0.0281028]),  # default!!
         pinch_point_base_left_hand = np.array([-0.07445, -0.145609, 0.0281028]),
-        # pinch_point_base_right_hand = np.array([-0.07445, -0.145609, -0.0221028]), #for table
-        # pinch_point_base_right_hand = np.array([-0.08045, -0.12709, -0.0221028]), #for table
-        # pinch_point_base_right_hand = np.array( [-0.07199096,-0.15723589,-0.02983844]), #for table
-        # pinch_point_base_right_hand = np.array( [-0.07176098,-0.15764823,-0.02108007]), #for table
-        # pinch_point_base_right_hand = np.array([-0.07445, -0.145609, -0.0281028]), #for table
     )
 
     key_axes =dict(

@@ -32,7 +32,7 @@ camera_config:
 
 default:
   env_seed: 0         
-  render_scene: true
+  render_scene: false
   random_scene: true              
   random_once: false              
   record_data: true              
