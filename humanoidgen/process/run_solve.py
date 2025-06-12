@@ -25,11 +25,15 @@ with open(config_file, "r") as file:
 
 @dataclass
 class Args:
-    env_id: Annotated[Optional[str], tyro.conf.arg(aliases=["-e"])] = run_config["env_id"]
-    solve_folder: Annotated[Optional[str], tyro.conf.arg(aliases=["-s"])] = run_config["solve_folder"]
+    env_id: Annotated[Optional[str], tyro.conf.arg(aliases=["-env"])] = run_config["env_id"]
+    solve_folder: Annotated[Optional[str], tyro.conf.arg(aliases=["-solve"])] = run_config["solve_folder"]
+    render_scene: Annotated[Optional[bool], tyro.conf.arg(aliases=["-render"])] = run_config["default"]["render_scene"]
+    save_video: Annotated[Optional[bool], tyro.conf.arg(aliases=["-video"])] = run_config["default"]["save_video"]
 
 args = tyro.cli(Args)
 print(f"Running environment: {args.env_id}")
+run_config["default"]["render_scene"]=args.render_scene
+run_config["default"]["save_video"]=args.save_video
 run_config.update(vars(args))
 
 solve_folder = run_config["solve_folder"]

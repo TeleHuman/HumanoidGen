@@ -38,7 +38,7 @@ default:
   end_scene: true
   end_scene_step_num: 20
   # 
-  save_video: true
+  save_video: True
   save_when_fail: false
   record_env_name: ""            
   record_freq: 10                 
