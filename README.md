@@ -58,7 +58,7 @@ bash scripts/run_scene.sh
 bash scripts/run_solve.sh
 ```
 
-In addition, you can specify main parameters either by directly modifying the sh script file or by using the commands below: 
+In addition, you can specify main parameters either by directly modifying the sh script file or by using the commands below:
 
 ```sh
 python process/run_scene.py -env block_handover -render False
@@ -69,9 +69,34 @@ To set more parameters, configure the config file. For details, see [**Configura
 
 ### 3. Data collection & Visualization
 
-To collect data, open the configuration file [config_run_solve.yml](./humanoidgen/config/config_run_solve.yml) and set "record\_data" to true. For example, for task "block\_handover", then run the execution command:
+To collect data, open the configuration file [config_run_solve.yml](./humanoidgen/config/config_run_solve.yml) and set "record\_data" to true. Then run the execution command( Example for ‘block_handover‘ task):
 
 ```sh
 python process/run_solve.py -env block_handover -solve block_handover -render False
 ```
+
+### 4. Generate task execution code
+
+This project supports two generation methods: direct generation and using MCTS. The execution commands are as follows:
+
+```sh
+bash scripts/run_generate_solve.sh block_handover 5
+bash scripts/run_generate_solve_with_mcts.sh blocks_stack_hard_mcts 5
+```
+
+The first argument specifies the name of the generated task, and the second argument is the number of parallel threads to run. If it is necessary to interrupt the generation process, run the following command:
+
+```sh
+bash scripts/kill_all_generate_processes.sh
+```
+
+## 📦 **Code to be released**
+
+1. Policy (DP & DP3) Training and Deployment.
+2. Release of Benchmark Datasets and Checkpoints.
+3. Scene augmentation using Robocasa.
+4. Scene Generation.
+5. More complex tasks.
+
+
 
