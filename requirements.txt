@@ -3,3 +3,4 @@ easydict==1.13
 open3d==0.18.0 
 openai==1.79.0 
 drake==1.26.0
+zarr==2.12.0

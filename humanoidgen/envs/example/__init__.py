@@ -26,4 +26,3 @@ from .cup_pour_easy import CupPourEasyEnv
 from .handover_and_storage_cooperation import HandoverAndStorageCooperationEnv
 from .blocks_stack_single import BlocksStackSingleEnv
 from .blocks_stack_hard_mcts import BlocksStackHardMctsEnv
-from .pyramid_stack_mcts import PyramidStackMctsEnv
