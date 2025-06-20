@@ -32,6 +32,9 @@ def main():
         ep_begin, ep_end = episode_num[0], episode_num[1]
         ep_p = ep_begin
         load_dir = str(ROOT_PATH/f'datasets/{dataset_name}')
+        if not os.path.exists(load_dir):
+            print(f"Dataset {dataset_name} does not exist at {load_dir}, skipping...")
+            continue
         save_video_dir = str(ROOT_PATH / 'videos'/'datasets'/f"{dataset_name}")  # Directory to save videos
         os.makedirs(save_video_dir, exist_ok=True)
 

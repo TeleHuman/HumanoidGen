@@ -2,6 +2,6 @@ dataset_names: [
   block_handover_20250612_010659_pkl,
 ] # base path: humanoidgen/datasets
 episode_num: [0,100]
-run_type: show_states # show_video, save_video, show_pc, show_states
+run_type: save_video # show_video, save_video, show_pc, show_states
 fps: 30
 video_writer_type: "imageio" # "imageio" or "opencv" 

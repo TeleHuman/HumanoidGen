@@ -4,3 +4,11 @@ open3d==0.18.0
 openai==1.79.0 
 drake==1.26.0
 zarr==2.12.0
+hydra-core==1.2.0
+dill==0.3.5.1
+wandb
+einops==0.4.1
+diffusers==0.11.1
+torchvision
+numba==0.56.4
+huggingface_hub==0.25.0

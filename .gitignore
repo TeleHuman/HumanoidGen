@@ -11,9 +11,10 @@ dist/
 videos/
 test/
 *_local/
-datasets/
+datasets/*
 assets/
 *log/
 humanoidgen/motion_planning/h1_2/solution/mcts/*
 Tokens_consumption.txt
 *_2025*/
+humanoidgen/policy/data
