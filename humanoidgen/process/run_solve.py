@@ -114,6 +114,7 @@ while True:
     for i in range(count_step_files(solve_folder_path)):
         run_step(solve_folder_path,f"step{i}.py",planner)
     env.end_task(save_file=f"run_solve/{run_config['env_id']}")
+    planner.end_planner()
     del planner
     execution_id+=1
     if exe_until_max_episodes_success == True:

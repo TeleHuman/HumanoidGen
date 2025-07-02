@@ -10,6 +10,7 @@ from humanoidgen import ROOT_PATH
 import yaml
 from enum import Enum
 import time
+import matplotlib.pyplot as plt
 
 class RunType(Enum):
     SHOW_VIDEO = "show_video"
@@ -120,8 +121,7 @@ def main():
                             writer.close()
 
             elif run_type == RunType.SHOW_STATES:
-                all_states = np.array(all_states)  
-                import matplotlib.pyplot as plt
+                all_states = np.array(all_states)
                 plt.figure(figsize=(10, 6))
                 for i in range(all_states.shape[-1]):  
                     plt.plot(all_states[:,  i], label=f"State Dimension {i+1}")

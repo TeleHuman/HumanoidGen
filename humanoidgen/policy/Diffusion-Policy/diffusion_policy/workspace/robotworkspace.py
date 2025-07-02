@@ -7,11 +7,18 @@ if __name__ == "__main__":
     sys.path.append(ROOT_DIR)
     os.chdir(ROOT_DIR)
 
+import sys
+import os
+import pathlib
+
+ROOT_DIR = str(pathlib.Path(__file__).parent.parent.parent)
+sys.path.append(ROOT_DIR)
+os.chdir(ROOT_DIR)
+
 import os
 import hydra
 import torch
 from omegaconf import OmegaConf
-import pathlib
 from torch.utils.data import DataLoader
 import copy
 import random
@@ -266,11 +273,19 @@ class RobotWorkspace(BaseWorkspace):
                 # checkpoint
                 if ((self.epoch + 1) % cfg.training.checkpoint_every) == 0:
                     # checkpointing
-                    self.save_checkpoint(f'checkpoints/{cfg.task.name}/{self.epoch + 1}.ckpt') # TODO
-                    # print(self.cfg.task.dataset.zarr_path)
-                    # print(f'checkpoints/{save_name}_{seed}/{self.epoch + 1}.ckpt')
-                    # input()
-                
+                    self.save_checkpoint(f'{ROOT_DIR}/checkpoints/{self.cfg.task.name}/{self.epoch + 1}.ckpt') # TODO
+
+                    # light ckpt
+                    checkpoint = {
+                    'model_state_dict': policy.state_dict(),
+                    }
+                    save_path = f"{ROOT_DIR}/checkpoints/{cfg.task.name}"
+                    os.makedirs(save_path, exist_ok=True)
+                    save_path = save_path+f"/{self.epoch + 1}.pth"
+                    torch.save(checkpoint, save_path)
+                    print(f"Saved light checkpoint to {save_path}")
+
+
                 # ========= eval end for this epoch ==========
                 policy.train()
 

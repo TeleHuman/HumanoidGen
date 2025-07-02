@@ -15,6 +15,11 @@ def main():
         episode_num=zarr_config["episode_num"]
         dp=zarr_config["dp"]
         dp3=zarr_config["dp3"]
+        dp_downsample= zarr_config["dp_downsample"]
+        dp3_downsample= zarr_config["dp3_downsample"]
+
+    if dp == dp3:
+        raise ValueError("dp and dp3 cannot be both True or both False. Please set only one to True.")
     
     for dataset_name in dataset_names:
         print(f'Processing datasets: {dataset_name}')
@@ -29,8 +34,9 @@ def main():
         zarr_data_dp = None
         zarr_meta_dp = None
 
+        save_dataset_name = dataset_name.replace("_pkl", "")
         if dp3:
-            save_dir_dp3 = str(ROOT_PATH/f'policy/3D-Diffusion-Policy/data/{dataset_name}_{ep_begin}_{ep_end}.zarr')
+            save_dir_dp3 = str(ROOT_PATH/f'policy/3D-Diffusion-Policy/data/{save_dataset_name}_dp3.zarr')
             if os.path.exists(save_dir_dp3):
                 shutil.rmtree(save_dir_dp3)
             zarr_root_dp3 = zarr.group(save_dir_dp3)
@@ -38,7 +44,7 @@ def main():
             zarr_meta_dp3 = zarr_root_dp3.create_group('meta')
 
         if dp:
-            save_dir_dp = str(ROOT_PATH/f'policy/Diffusion-Policy/data/{dataset_name}_{ep_begin}_{ep_end}.zarr')
+            save_dir_dp = str(ROOT_PATH/f'policy/Diffusion-Policy/data/{save_dataset_name}_dp.zarr')
             if os.path.exists(save_dir_dp):
                 shutil.rmtree(save_dir_dp)
             zarr_root_dp = zarr.group(save_dir_dp)
@@ -74,12 +80,12 @@ def main():
                 if dp3:
                     pcd = data['pointcloud']
                     point_cloud_sub_arrays.append(pcd)
+                    file_num += dp3_downsample
                 
                 if dp:
                     head_img = data['observation']['head_camera']['rgb']
                     head_camera_sub_arrays.append(head_img)
-
-                file_num += 1
+                    file_num += dp_downsample
                 total_count += 1
             
             ep_p += 1
@@ -89,8 +95,8 @@ def main():
             state_sub_arrays = np.array(state_sub_arrays)
 
             joint_action_sub_arrays = joint_action_sub_arrays[1:]
-            joint_action_sub_arrays[:,0:7] = state_sub_arrays[1:,0:7] # left arm
-            joint_action_sub_arrays[:,13:20] = state_sub_arrays[1:,13:20] # right arm
+            # joint_action_sub_arrays[:,0:7] = state_sub_arrays[1:,0:7] # left arm
+            # joint_action_sub_arrays[:,13:20] = state_sub_arrays[1:,13:20] # right arm
 
             state_sub_arrays = state_sub_arrays[:-1]
 
