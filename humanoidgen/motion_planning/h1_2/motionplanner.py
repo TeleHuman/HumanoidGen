@@ -201,30 +201,22 @@ class HumanoidMotionPlanner:
     def get_default_pose(self):
         default_pose = self.robot.get_qpos()[0, :38].cpu().numpy()
         if self.gripper_state[0] == HandState.GRASP:
-            # if self.delta_grasp_action_left is not None:
-            #     default_pose = default_pose+self.delta_grasp_action_left*2
+
             action = self.left_hand_grasp_joint
             default_pose = self.left_hand_action_to_pose(action,default_pose,low_joint=True)
-            # else:
-            #     action=[1.3, 0.931, 1.02, 1.027, 1.023,0.279, 0.797, 0.814, 0.815, 0.818, 0.27,0.278]
-            #     default_pose = self.left_hand_action_to_pose(action,default_pose)
+
         elif self.gripper_state[0] == HandState.PINCH:
-            # if self.delta_pinch_action_left is not None:
-            #     default_pose = default_pose+self.delta_pinch_action_left
+
             action = self.left_hand_pinch_joint
             default_pose = self.left_hand_action_to_pose(action,default_pose,low_joint=True)
             
         if self.gripper_state[1] == HandState.GRASP:
-            # if self.delta_grasp_action_right is not None:
-                # default_pose = default_pose+self.delta_grasp_action_right*2
-            # action=[1.3, 0.931, 1.02, 1.027, 1.023,0.279, 0.797, 0.814, 0.815, 0.818, 0.27,0.278]
-            # default_pose = self.right_hand_action_to_pose(action,default_pose)
+
             action = self.right_hand_grasp_joint
             default_pose = self.right_hand_action_to_pose(action,default_pose,low_joint=True)
 
         elif self.gripper_state[1] == HandState.PINCH:
-            # if self.delta_pinch_action_right is not None:
-            #     default_pose = default_pose+self.delta_pinch_action_right*2
+
             action = self.right_hand_pinch_joint
             default_pose = self.right_hand_action_to_pose(action,default_pose,low_joint=True)
         return default_pose
@@ -250,8 +242,6 @@ class HumanoidMotionPlanner:
             planner = mplib.Planner(
                 urdf=self.env_agent.urdf_path,
                 srdf=self.env_agent.urdf_path.replace(".urdf", ".srdf"),
-                # srdf="/home/js/HGenSim/HGenSim/ManiSkill/mani_skill/assets/robots/h1_2/h1_2_upper_body_left.srdf",
-                # /home/js/HGenSim/HGenSim/ManiSkill/mani_skill/assets/robots/h1_2/h1_2_upper_body_left.srdf
                 user_link_names=link_names,
                 user_joint_names=joint_names,
                 move_group="L_hand_base_link",
@@ -265,20 +255,10 @@ class HumanoidMotionPlanner:
         print("Closing hands!!!!")
         # qpos = self.robot.get_qpos()[0, :14].cpu().numpy()
         qpos = self.robot.get_qpos()[0, :38].cpu().numpy()
-        
-        # print("Gripper state: ", self.robot.get_qpos()) # get robot state (38,)
-        # print("control_mode: ", self.control_mode)
-        # print(qpos.shape)
-        # print(qpos)
-
         for i in range(t):
             if self.control_mode == "pd_joint_pos":
-                # action = np.hstack([qpos, np.ones(24)])
-                # action = np.hstack([qpos,np.ones(1)])
                 action = np.hstack([qpos])
                 action[0] = 0.01
-            # else:
-                # action = np.hstack([qpos, qpos * 0, self.gripper_state])
             print("Action: ", action)
             obs, reward, terminated, truncated, info = self.env.step(action)
             self.elapsed_steps += 1
@@ -333,8 +313,7 @@ class HumanoidMotionPlanner:
             qpos = self.robot.get_qpos()[0, :38].cpu().numpy()
         else:
             qpos = default_pose.copy()
-        # input: action (12,) output: pose (38,)
-        # qpos = self.robot.get_qpos()[0, :38].cpu().numpy()
+
         if not low_joint:
             qpos[19:24]=action[0:5]
             qpos[29:34]=action[5:10]
@@ -350,9 +329,7 @@ class HumanoidMotionPlanner:
         return qpos
     
     def judge_object_in_hand(self,hand_name,object_name,object_id):
-        # 确定hand_name
-        # hand_id = 0 if "left" in hand_name else 1
-        # print("judge object in hand: ",hand_name,object_name,object_id)
+
         point_name = ""
         if "left" in hand_name:
             if self.gripper_state[0] == HandState.GRASP:
@@ -384,32 +361,8 @@ class HumanoidMotionPlanner:
             return False
 
     def left_hand_pre_grasp(self, t=6):
-        # default_pose = self.robot.get_qpos()[0, :38].cpu().numpy()  
-        # if self.gripper_state[1] == HandState.PINCH:
-        #     if self.delta_pinch_action_right is not None:
-        #         default_pose = default_pose+self.delta_pinch_action_right*2
-        # print("left hand pre grasp!!!!")
-        # action=[1.25] + [0] * 11
-        # qpos = self.left_hand_action_to_pose(action)
-        # del_action = (np.array(qpos)-self.robot.get_qpos()[0, :38].cpu().numpy())/t
 
-        # for i in range(t):
-        #     # qpos = self.left_hand_action_to_pose(action,default_pose)
-        #     obs, reward, terminated, truncated, info = self.env.step(self.robot.get_qpos()[0, :38].cpu().numpy()+del_action+self.delta_pinch_action_right)
-        #     if self.vis:
-        #         self.base_env.render()
-            
-        #     if self.save_video:
-        #         rgb = self.env.unwrapped.render_rgb_array()
-        #         self.images.append(rgb)
-        # self.gripper_state[0] = HandState.PRE_GRASP
-        # default_pose = self.robot.get_qpos()[0, :38].cpu().numpy()  
-        # if self.gripper_state[1] == HandState.PINCH:
-        #     if self.delta_pinch_action_right is not None:
-        #         default_pose = default_pose+self.delta_pinch_action_right*2
         print("left hand pre grasp!!!!")
-        # action=[1.174] + [0] * 11
-        # qpos = self.left_hand_action_to_pose(action)
         default_pose = self.get_default_pose()
         action=self.left_hand_pre_grasp_joint
         qpos = self.left_hand_action_to_pose(action,default_pose,low_joint=True)
@@ -426,20 +379,6 @@ class HumanoidMotionPlanner:
 
 
 
-    # def left_hand_grasp(self, t=6):
-    #     if self.gripper_state[0] != HandState.PRE_GRASP:
-    #         exception_str = "Left hand is not in pre-grasp state. Cannot grasp."
-    #         print(exception_str)
-    #         raise Exception(exception_str)
-    #     print("left hand grasp!!!!")
-    #     action=[1.3, 0.758, 0.752, 0.755, 0.758, 0.315, 0.815, 1.097, 1.1, 1.101,0.399,0.582]
-    #     qpos = self.left_hand_action_to_pose(action)
-    #     for i in range(t):
-    #         obs, reward, terminated, truncated, info = self.env.step(qpos)
-    #         if self.vis:
-    #             self.base_env.render()
-    #     self.gripper_state[0] = HandState.GRASP
-
     def left_hand_grasp(self, t=50):
         if self.gripper_state[0] != HandState.PRE_GRASP:
             exception_str = "right hand is not in pre-grasp state. Cannot grasp."
@@ -452,19 +391,6 @@ class HumanoidMotionPlanner:
         qpos = self.left_hand_action_to_pose(action,default_pose,low_joint=True)
         self.delta_grasp_action_left = (np.array(qpos)-default_pose)/t
         for i in range(t):
-            # if self.gripper_state[1] == HandState.PINCH and self.delta_pinch_action_right is not None:
-            #     obs, reward, terminated, truncated, info = self.env.step(self.robot.get_qpos()[0, :38].cpu().numpy()+del_action+self.delta_pinch_action_right*2)
-            # else:
-            #     obs, reward, terminated, truncated, info = self.env.step(self.robot.get_qpos()[0, :38].cpu().numpy()+del_action)
-            
-            # hand_joint =self.get_hand_joint("left")
-            # default_pose = self.left_hand_action_to_pose(hand_joint,default_pose)
-            # obs, reward, terminated, truncated, info = self.env.step(default_pose+self.delta_grasp_action_left)
-            # if self.vis:
-            #     self.base_env.render()
-            # if self.save_video:
-            #     rgb = self.env.unwrapped.render_rgb_array()
-            #     self.images.append(rgb)
 
             obs, reward, terminated, truncated, info = self.env.step(default_pose+self.delta_grasp_action_left*(i+1))
             if self.vis:
@@ -474,17 +400,7 @@ class HumanoidMotionPlanner:
                 self.images.append(rgb)
         
 
-        # for j in range(15):
-        #     hand_joint =self.get_hand_joint("left")
-        #     default_pose = self.left_hand_action_to_pose(hand_joint,default_pose)
-        #     obs, reward, terminated, truncated, info = self.env.step(default_pose+self.delta_grasp_action_left)
-        #     if self.vis:
-        #         self.base_env.render()
-        #     if self.save_video:
-        #         rgb = self.env.unwrapped.render_rgb_array()
-        #         self.images.append(rgb)
-        # default_pose = self.get_default_pose()
-        # delta_grasp2 = (np.array(qpos)-default_pose)/15
+
         for j in range(15):
             obs, reward, terminated, truncated, info = self.env.step(qpos)
             if self.vis:
@@ -573,17 +489,6 @@ class HumanoidMotionPlanner:
         
         n_step = result["position"].shape[0]
         default_pose =self.get_default_pose()
-        # if self.gripper_state[1] == HandState.GRASP:
-        #     action=[1.3, 0.931, 1.02, 1.027, 1.023,0.279, 0.797, 0.814, 0.815, 0.818, 0.27,0.278]
-        #     default_pose = self.right_hand_action_to_pose(action)
-        # elif self.gripper_state[1] == HandState.PINCH:
-        #     if self.delta_pinch_action_right is not None:
-        #         default_pose = self.robot.get_qpos()[0, :38].cpu().numpy()+self.delta_pinch_action_right*5
-        #     else:
-        #         action=[1.174, 1.0]+[0] * 3+[0.167, 0.664]+[0] * 3+[0.39, 0.534]
-        #         default_pose = self.right_hand_action_to_pose(action)
-        # else:
-        #     default_pose = self.robot.get_qpos()[0, :38].cpu().numpy()
         
         path_point=np.array([[]])
         for i in range(n_step):
@@ -656,22 +561,7 @@ class HumanoidMotionPlanner:
             out[0] = (
                 self.get_eef_z().dot(np.array([0, 0, -1])) - 0.966
             )  # maintain 15 degrees w.r.t. -z axis
-            # all_pose=self.r_planner.robot.get_qpos().copy()
-            # all_pose=self.robot.get_qpos()[0, :38].cpu().numpy().copy()
-            # # move_group_pose=all_pose[self.r_planner.move_group_joint_indices]
-            # all_pose[self.r_planner.move_group_joint_indices]=x
-            # self.r_planner.robot.set_qpos(x)
-            # self.r_planner.pinocchio_model.compute_forward_kinematics(all_pose)
-            # ee_index=self.r_planner.link_name_2_idx["R_hand_base_link"]
-            # ee_pose=self.r_planner.pinocchio_model.get_link_pose(ee_index)
-            # pose_quat=ee_pose[3:7]
-            # quat2mat(pose_quat)
-            # # out=[]
-            # # out.append(-quat2mat(pose_quat)[:,2].dot(np.array([0,0,1]))- 0.966)
-            # out[0]=-quat2mat(pose_quat)[:,2].dot(np.array([0,0,1]))- 0.966
-            # return out
 
-        # constraint function ankor end
         return f
     def make_j(self):
         """
@@ -693,27 +583,7 @@ class HumanoidMotionPlanner:
                 out[i] = np.cross(rot_jac[:, i], self.get_eef_z()).dot(
                     np.array([0, 0, -1])
                 )
-            # all_pose=self.r_planner.robot.get_qpos()
-            # all_pose=self.robot.get_qpos()[0, :38].cpu().numpy().copy()
-            # # move_group_pose=all_pose[self.r_planner.move_group_joint_indices]
-            # all_pose[self.r_planner.move_group_joint_indices]=x
-            # # full_qpos = self.r_planner.pad_move_group_qpos(x)
-            # ee_index=self.r_planner.link_name_2_idx["R_hand_base_link"]
-            # jac = self.r_planner.robot.get_pinocchio_model().compute_single_link_jacobian(
-            #     all_pose, ee_index
-            # )
-            # rot_jac = jac[3:, self.r_planner.move_group_joint_indices]
-            # # out=[]
-            # ee_pose=self.r_planner.pinocchio_model.get_link_pose(ee_index)
-            # pose_quat=ee_pose[3:7]
-            # eef_z=-quat2mat(pose_quat)[:,2]
-            # # i=0
-            # for i in range(len(self.r_planner.move_group_joint_indices)):
-            #     out[i]=np.cross(rot_jac[:, i], eef_z).dot(
-            #         np.array([0, 0, 1])
-            #     )
 
-        # constraint jacobian ankor end
         return j
 
     def right_move_to_pose_with_screw(
@@ -729,42 +599,11 @@ class HumanoidMotionPlanner:
             self.hand_grasp_point.set_pose(sapien.Pose(p=transform_keypoint_to_base(self.env.agent.key_points["grasp_point_base_right_hand"],pose)))
         pose = sapien.Pose(p=pose.p , q=pose.q)
 
-        # self_collision_list=self.r_planner.check_for_self_collision(qpos=self.robot.get_qpos().cpu().numpy()[0])
-        # for collision in self_collision_list:
-        #     print(f"\033[91mCollision between {collision.link_name1} and {collision.link_name2}\033[0m")
+
         pre_point = transform_keypoint_to_base(np.array([0, 0.1, 0]), pose)
         pre_pose = sapien.Pose(p=pre_point , q=pose.q)
         
-        # result = self.planner.plan_qpos_to_pose(
-        #     np.concatenate([pre_pose.p, pre_pose.q]),
-        #     self.robot.get_qpos().cpu().numpy()[0],
-        #     time_step=self.base_env.control_timestep,
-        #     # time_step=1/250,
-        #     use_point_cloud=self.use_point_cloud,
-        #     use_attach=self.use_attach
-        # )
-        # if result["status"] != "Success":
-        #     # return -1
-        #     result = self.planner.plan_qpos_to_pose(
-        #         np.concatenate([pre_pose.p, pre_pose.q]),
-        #         self.robot.get_qpos().cpu().numpy()[0],
-        #         # time_step=1/250,
-        #         time_step=self.base_env.control_timestep,
-        #         use_point_cloud=self.use_point_cloud,
-        #         use_attach=self.use_attach
-        #     )
-        #     if result["status"] != "Success":
-        #         print(result["status"])
-        #         self.render_wait()
-        #         return -1
-        # self.render_wait()
-        # self.use_attach = False
 
-        # # self.build_robot_plant()
-        # self.right_follow_path(result, refine_steps=refine_steps)
-
-        # pose = sapien.Pose(p=pose.p-delta_p , q=pose.q)
-        # result = self.r_planner.plan_qpos_to_pose(
         if easy_plan:
             result = self.r_planner.plan_screw(
                 np.concatenate([pose.p, pose.q]),
@@ -785,40 +624,7 @@ class HumanoidMotionPlanner:
                     use_attach=self.use_attach[1]
                 )
             else:
-                # def f(x, out):
-                # def f():
-                #     all_pose=self.r_planner.robot.get_qpos()
-                #     move_group_pose=all_pose[self.r_planner.move_group_joint_indices]
-                #     self.r_planner.robot.set_qpos(move_group_pose)
-                #     self.r_planner.pinocchio_model.compute_forward_kinematics(all_pose)
-                #     ee_index=self.r_planner.link_name_2_idx["R_hand_base_link"]
-                #     ee_pose=self.r_planner.pinocchio_model.get_link_pose(ee_index)
-                #     pose_quat=ee_pose[3:7]
-                #     quat2mat(pose_quat)
-                #     out=[]
-                #     out.append(-quat2mat(pose_quat)[:,2].dot(np.array([0,0,1]))- 0.966)
-                #     return out
-                #     # out[0] = (
-                #     #     self.get_eef_z().dot(np.array([0, 0, -1])) - 0.966
-                #     # )  # maintain 15 degrees w.r.t. -z axis
-                # def j():
-                #     all_pose=self.r_planner.robot.get_qpos()
-                #     move_group_pose=all_pose[self.r_planner.move_group_joint_indices]
-                #     # full_qpos = self.r_planner.pad_move_group_qpos(x)
-                #     ee_index=self.r_planner.link_name_2_idx["R_hand_base_link"]
-                #     jac = self.r_planner.robot.get_pinocchio_model().compute_single_link_jacobian(
-                #         all_pose, ee_index
-                #     )
-                #     rot_jac = jac[3:, self.r_planner.move_group_joint_indices]
-                #     out=[]
-                #     ee_pose=self.r_planner.pinocchio_model.get_link_pose(ee_index)
-                #     pose_quat=ee_pose[3:7]
-                #     eef_z=-quat2mat(pose_quat)[:,2]
-                #     for index in self.r_planner.move_group_joint_indices:
-                #         out.append(np.cross(rot_jac[:, index], eef_z).dot(
-                #             np.array([0, 0, 1])
-                #         ))
-                #     return out
+
                 result = self.r_planner.plan_qpos_to_pose(
                     np.concatenate([pose.p, pose.q]),
                     self.robot.get_qpos().cpu().numpy()[0],
@@ -840,15 +646,7 @@ class HumanoidMotionPlanner:
                 use_point_cloud=self.use_point_cloud,
                 use_attach=self.use_attach[1]
             )
-            # return -1
-            # result = self.planner.plan_qpos_to_pose(
-            #     np.concatenate([pose.p, pose.q]),
-            #     self.robot.get_qpos().cpu().numpy()[0],
-            #     # time_step=1/250,
-            #     time_step=self.base_env.control_timestep,
-            #     use_point_cloud=self.use_point_cloud,
-            #     use_attach=self.use_attach
-            # )
+
             if result["status"] != "Success":
                 print(result["status"])
                 self.render_wait()
@@ -931,12 +729,7 @@ class HumanoidMotionPlanner:
         # print("generate_end_effector_pose")
         # print("################")
         print("start generate_end_effector_pose_tool() !!!")
-        # ik_context=self.robot_plant.GetMyContextFromRoot(self.fk_plant_context)
-        # ik_context = self.robot_plant.CreateDefaultContext()
-        # initial_guess = np.zeros(self.robot_plant.num_positions())
-        # # 例如，设置为当前状态或合理猜测
-        # self.robot_plant.SetPositions(self.fk_plant_context, initial_guess)
-        # fk_context = self.robot_plant.CreateDefaultContext()
+
         ik = drake.InverseKinematics(self.robot_plant)
 
         # collision_model = self.robot_plant.CreateCollisionModel()
@@ -944,17 +737,12 @@ class HumanoidMotionPlanner:
         for constraint in constraints:
             if isinstance(constraint, Constraint):
                 if constraint.type == "point2point":
-                    # constraint.object_key_point[2]=constraint.object_key_point[2]+0.035
-                    # hand_key_point=constraint.hand_key_point
-                    # object_key_point=constraint.object_key_point
                     range_min = constraint.object_key_point-np.array([0.005,0.005,0.001])
                     range_max = constraint.object_key_point + np.array([0.005,0.005,0.001])
                     ik.AddPositionConstraint(
                         self.robot_plant.GetFrameByName(constraint.end_effector_frame),
                         constraint.hand_key_point,
                         self.robot_plant.world_frame(),
-                        # constraint.object_key_point - constraint.tolerance,
-                        # constraint.object_key_point + constraint.tolerance,
                         range_min,
                         range_max
                     )
@@ -968,22 +756,9 @@ class HumanoidMotionPlanner:
                         angle_lower=0,
                         angle_upper=0.02,
                     )
-                    # ik.AddAngleBetweenVectorsCost(
-                    #     self.robot_plant.GetFrameByName(constraint.end_effector_frame),
-                    #     constraint.hand_axis.reshape(3, 1),
-                    #     self.robot_plant.world_frame(),
-                    #     constraint.object_axis.reshape(3, 1),
-                    #     # angle_lower=0,
-                    #     # angle_upper=0.00001,
-                    #     c=10
-                    # )
+
                 elif constraint.type == "attach_obj_target_pose":
-                    # constraint.attach_obj.pose.q
-                    # print("constraint.attach_obj.pose.q:",constraint.attach_obj.pose.q)
-                    # quat2mat(constraint.attach_obj.pose.get_q()[0])
-                    # constraint.attach_obj.pose.to_transformation_matrix()
-                    # quat2mat(constraint.attach_obj.pose.get_q()[0])
-                    # quat2mat(constraint.attach_obj.pose.get_q()[0])
+
                     R_AbarA=pydrake.math.RotationMatrix(constraint.attach_obj_target_pose_base_hand)
                     R_BbarB=pydrake.math.RotationMatrix(constraint.attach_obj_target_pose)
                     ik.AddOrientationConstraint(
@@ -993,40 +768,18 @@ class HumanoidMotionPlanner:
                         R_BbarB,
                         theta_bound=0.001
                     )
-                    # ik.AddOrientationCost(
-                    #     self.robot_plant.GetFrameByName(constraint.end_effector_frame),
-                    #     R_AbarA,
-                    #     self.robot_plant.world_frame(),
-                    #     R_BbarB,
-                    #     c=10
-                    # )
             elif isinstance(constraint, Cost):
                 if constraint.type == "point2point":
-                    # constraint.object_key_point[2]=constraint.object_key_point[2]+0.035
-                    # hand_key_point=constraint.hand_key_point
-                    # object_key_point=constraint.object_key_point
-                    # range_min = constraint.object_key_point-np.array([0.01,0.01,0.001])
-                    # range_max = constraint.object_key_point + np.array([0.01,0.01,0.001])
                     temp = np.eye(3)
                     ik.AddPositionCost(
                         self.robot_plant.GetFrameByName(constraint.end_effector_frame),
                         constraint.hand_key_point,
                         self.robot_plant.world_frame(),
                         constraint.object_key_point,
-                        # constraint.object_key_point - constraint.tolerance,
-                        # constraint.object_key_point + constraint.tolerance,
                         temp
                     )
                 elif constraint.type == "parallel":
-                    # if constraint.hand_axis=="grasp_axis":
-                    # ik.AddAngleBetweenVectorsConstraint(
-                    #     self.robot_plant.GetFrameByName(constraint.end_effector_frame),
-                    #     np.array([0, 0, -1]).reshape(3, 1),
-                    #     self.robot_plant.world_frame(),
-                    #     constraint.object_axis.reshape(3, 1),
-                    #     angle_lower=0,
-                    #     angle_upper=0.001,
-                    # )
+
                     ik.AddAngleBetweenVectorsCost(
                         self.robot_plant.GetFrameByName(constraint.end_effector_frame),
                         constraint.hand_axis.reshape(3, 1),
@@ -1037,12 +790,6 @@ class HumanoidMotionPlanner:
                         c=10
                     )
                 elif constraint.type == "attach_obj_target_pose":
-                    # constraint.attach_obj.pose.q
-                    # print("constraint.attach_obj.pose.q:",constraint.attach_obj.pose.q)
-                    # quat2mat(constraint.attach_obj.pose.get_q()[0])
-                    # constraint.attach_obj.pose.to_transformation_matrix()
-                    # quat2mat(constraint.attach_obj.pose.get_q()[0])
-                    # quat2mat(constraint.attach_obj.pose.get_q()[0])
                     R_AbarA=pydrake.math.RotationMatrix(constraint.attach_obj_target_pose_base_hand)
                     R_BbarB=pydrake.math.RotationMatrix(constraint.attach_obj_target_pose)
                     ik.AddOrientationCost(
@@ -1052,29 +799,8 @@ class HumanoidMotionPlanner:
                         R_BbarB,
                         c=10
                     )
-        # print("drake.math.RotationMatrix.MakeXRotation(0):",pydrake.math.RotationMatrix.MakeXRotation(0))
-        # print("drake.math.RotationMatrix.MakeXRotation(0):",pydrake.math.RotationMatrix.MakeYRotation(0))
-        # R_AbarA = pydrake.math.RotationMatrix.MakeXRotation(-1.57)  #
-        # R_BbarB = pydrake.math.RotationMatrix.MakeYRotation(-0.9)  # 
 
-        # ik.AddOrientationConstraint(
-        #     self.robot_plant.GetFrameByName("r_hand_base_link"),
-        #     R_AbarA,
-        #     self.robot_plant.world_frame(),
-        #     R_BbarB,
-        #     theta_bound=0.001
-        # )
-        
-        # R_AbarA = pydrake.math.RotationMatrix.MakeZRotation(-2.5)  #
-        # R_BbarB = pydrake.math.RotationMatrix.MakeYRotation(1.57)  # 
-        #### test
-        # ik.AddOrientationCost(
-        #     self.robot_plant.GetFrameByName("r_hand_base_link"),
-        #     R_AbarA,
-        #     self.robot_plant.world_frame(),
-        #     R_BbarB,
-        #     c=1
-        # )
+
         
         ####
         if hand_name == "right":
@@ -1115,18 +841,7 @@ class HumanoidMotionPlanner:
         # ik.AddMinimumDistanceLowerBoundConstraint(0.01, influence_distance_offset=0.01)
         solver = drake.SnoptSolver()
         options = drake.SolverOptions()
-        # options.SetOption(solver.solver_id(), "Major feasibility tolerance", 1e-6)
-        # options.SetOption(solver.solver_id(), "Major optimality tolerance", 1e-6)
-        # options.SetOption(solver.solver_id(), "Iterations limit", 1000)
-        # initial_guess = np.zeros(self.robot_plant.num_positions())
-        # 例如，设置为当前状态或合理猜测
-        # self.robot_plant.SetPositions(self.fk_plant_context, initial_guess)
-        # ik.prog().SetInitialGuess(ik.q(), initial_guess)
-        # for i in range(10):
-        #     result = solver.Solve(ik.prog())
-        #     print("result:",result.is_success())
-        #     result = solver.Solve(ik.prog())
-        #     print("result:",result.is_success())
+
 
         result = solver.Solve(ik.prog())
 
@@ -1376,12 +1091,9 @@ class HumanoidMotionPlanner:
         builder = drake.DiagramBuilder()
         # scene_graph = builder.AddSystem(SceneGraph())
         self.robot_plant = builder.AddSystem(drake.MultibodyPlant(time_step=0.01))
-        # self.robot_plant.RegisterAsSourceForSceneGraph(scene_graph)
             
-        # self.robot_plant.RegisterAsSourceForSceneGraph(scene_graph)
         parser = drake.Parser(self.robot_plant)
 
-        # agent_parser = parser.AddModelFromFile(self.env_agent.drake_urdf_path)
         
         agent_parser=parser.AddModels(self.env_agent.drake_urdf_path)
         agent_parser = agent_parser[0]
@@ -1392,20 +1104,11 @@ class HumanoidMotionPlanner:
             if isinstance(joint, drake.RevoluteJoint):
                 joint.set_default_angle(0)
         
-        # box_shape = Box(0.5, 0.5, 0.5)  
-        # box_pose = RigidTransform([1.0, 0.0, 0.25])  
-        # default_model_instance = self.robot_plant.GetModelInstanceByName("DefaultModelInstance")
-        # box_body = self.robot_plant.AddRigidBody("box", default_model_instance, SpatialInertia(mass=1.0, p_PScm_E=np.zeros(3), G_SP_E=UnitInertia.SolidBox(0.5, 0.5, 0.5)))
-        # # box_body = self.robot_plant.AddRigidBody("box", SpatialInertia(mass=1.0, p_PScm_E=np.zeros(3), G_SP_E=UnitInertia.SolidBox(0.5, 0.5, 0.5)))
-        # self.robot_plant.RegisterCollisionGeometry(box_body, box_pose, box_shape, "box_collision", CoulombFriction(0.9, 0.8))
-        # self.robot_plant.RegisterVisualGeometry(box_body, box_pose, box_shape, "box_visual", [0.5, 0.5, 0.5, 1.0])
 
         ##### render #####
         if self.render_pydrake:
             renderer_name = "renderer"
             scene_graph.AddRenderer(renderer_name, MakeRenderEngineVtk(RenderEngineVtkParams()))
-            # Add camera with same color and depth properties.
-            # N.B. These properties are chosen arbitrarily.
             intrinsics = drake.CameraInfo(
                 width=640,
                 height=480,
@@ -1448,15 +1151,7 @@ class HumanoidMotionPlanner:
 
         #### end render #####
         self.robot_plant.Finalize()
-        # # Connect the plant and scene graph
-        # builder.Connect(
-        #     self.robot_plant.get_geometry_poses_output_port(),
-        #     scene_graph.get_source_pose_port(self.robot_plant.get_source_id())
-        # )
-        # builder.Connect(
-        #     scene_graph.get_query_output_port(),
-        #     self.robot_plant.get_geometry_query_input_port()
-        # )
+
 
         if self.render_pydrake:
             # Add visualization.
@@ -1475,10 +1170,7 @@ class HumanoidMotionPlanner:
             label = colorize_label.get_output_port().Eval(
                 colorize_label.GetMyContextFromRoot(fk_context)).data
 
-            # fig, ax = plt.subplots(1, 3, figsize=(15, 10))
-            # ax[0].imshow(color)
-            # ax[1].imshow(depth)
-            # ax[2].imshow(label)
+
             plt.imsave( ROOT_PATH/'imgs/color_image.png', color)
             plt.imsave( ROOT_PATH/'imgs/depth_image.png', depth, cmap='gray')  # 深度图通常使用灰度图
             plt.imsave( ROOT_PATH/'imgs/label_image.png', label)
@@ -1503,9 +1195,7 @@ class HumanoidMotionPlanner:
             )
         builder.initial_pose = sapien.Pose(p=[0, 0, 0])
         self.collision_point_cloud = builder.build_kinematic(name="collision_point_cloud")
-        # self.collision_point_cloud.set_pose(sapien.Pose([0, 0, 0]))
-        # self.collision_point_cloud.hide_visual()
-        # self.collision_point_cloud.show_visual()
+
 
 
     def init_all_point_cloud(self):
@@ -1538,14 +1228,7 @@ class HumanoidMotionPlanner:
         # except_actor_ids=[]
         except_actors = self.attach_obj
         except_actor_ids= self.attach_obj_id
-        # if isinstance(except_actor, str):
-        #     except_actors = [except_actor]
-        # elif isinstance(except_actor, list):
-        #     except_actors = except_actor
-        # if isinstance(except_actor_id, int):
-        #     except_actor_ids = [except_actor_id]
-        # elif isinstance(except_actor_id, list):
-        #     except_actor_ids = except_actor_id
+
         point_cloud = []
         for type_name in self.env.actor_count:
             for i in range(self.env.actor_count[type_name]):
@@ -1566,28 +1249,16 @@ class HumanoidMotionPlanner:
         # get all actors' collision mesh
         if self.use_obj_point_cloud:
             for actor in actors:
-                # if isinstance(actor, ArticulatedObject):
-                #     actor.instance.set_root_pose(np.array([0, 0, 0,1,0,0,0]))
-                # 获取 Actor 的碰撞网格
                 collision_meshes = actor.get_collision_meshes()
-                # print("collision_meshes:",type(collision_meshes[0]))
                 if actor.name == "drawer_0":
                     new_point_cloud, _ = trimesh.sample.sample_surface(collision_meshes[0], count=400000)
                 else:
                     new_point_cloud, _ = trimesh.sample.sample_surface(collision_meshes[0], count=10000)
-                # if isinstance(actor, ArticulatedObject):
-                    # new_point_cloud-=actor.instance.get_root_pose().p.numpy()
-                # new_point_cloud *= 1.1
                 if point_cloud.shape[1] == 0:
                     point_cloud = new_point_cloud
                 else:
                     point_cloud = np.concatenate([point_cloud, new_point_cloud], axis=0)
         
-        # get table collision mesh
-        # table 1
-        # table = trimesh.creation.box([1.209,2.418,  0.9196429])
-        # table_point_cloud,_ = trimesh.sample.sample_surface(table, count=1000)
-        # table_point_cloud += [-0.12, 0, -0.9196429 / 2]
         # table 2
         table = trimesh.creation.box([1.209,2.418,  0.025])
         table_point_cloud,_ = trimesh.sample.sample_surface(table, count=30000)
@@ -1608,40 +1279,7 @@ class HumanoidMotionPlanner:
             self.show_collision_point_cloud(point_cloud)
         return point_cloud
 
-        # # 获取 Actor 的碰撞网格
-        # collision_meshes = actor.get_collision_meshes()
-        # # 存储所有点的列表
-        # # all_points = []
-
-        # # for mesh in collision_meshes:
-        # #     # 获取几何体的顶点
-        # #     vertices = mesh.vertices
-        # #     # 将顶点转换为 numpy 数组
-        # #     vertices = np.array(vertices)
-        # #     # 将顶点转换为世界坐标系
-        # #     vertices = actor.pose.transform_points(vertices)
-        # #     # 将顶点添加到点列表中
-        # #     all_points.append(vertices)
-
-        # # 将所有点合并为一个 numpy 数组
-        # # all_points = np.concatenate(all_points, axis=0)
-        # # 使用 trimesh 采样表面点
-        # point_cloud, _ = trimesh.sample.sample_surface(collision_meshes[0], count=100)
-        # box = trimesh.creation.box([2.418 / 2, 1.209 / 2, 0.9196429 / 2])
-        # point_cloud2, _ = trimesh.sample.sample_surface(box, count=100)
-        # point_cloud2 += [0, 0, 0.9196429 / 2]
-        # # point_cloud = np.concatenate([point_cloud, point_cloud2], axis=0)
-        # self.planner.update_point_cloud(point_cloud)
-        # # point_cloud -= [3.5, -2, 1]
-        # # 更新点云到规划器
-        # # self.planner.update_point_cloud(point_cloud)
-        
-    # def add_table(self):
-    #     import trimesh
-    #     box = trimesh.creation.box([2.418 / 2, 1.209 / 2, 0.9196429 / 2])
-    #     points, _ = trimesh.sample.sample_surface(box, 1000)
-    #     points += [0, 0, 0.9196429 / 2]
-    #     self.planner.update_point_cloud(points)
+       
 
     def show_attach_point_cloud(self,point_cloud):
         if not self.show_key_points:
@@ -1796,12 +1434,6 @@ class HumanoidMotionPlanner:
     #### finger base manipulation control
     ## hand pre pinch
     def left_hand_pre_pinch(self, t=6):
-        # print("right hand pre grasp!!!!")
-        # default_pose=self.get_default_pose()
-        # 
-        # qpos = self.left_hand_action_to_pose(action,default_pose)
-        # t=50
-        # del_action = (np.array(qpos)-default_pose)/t
         t=50
         default_pose=self.get_default_pose()
         # action=[1.174, 0.5] + [0] * 10
@@ -1861,73 +1493,7 @@ class HumanoidMotionPlanner:
             print("Invalid hand selected")
             self.execution_result.append([3,False,"Invalid parameter hand_name. Please choose from 'all', 'right', or 'left'."])
     
-    #### hand pinch
-    # def left_hand_pinch(self, t=50):
-    #     if self.gripper_state[0] != HandState.PRE_PINCH:
-    #         exception_str = "left hand is not in pre-pinch state. Cannot pinch."
-    #         print(exception_str)
-    #         raise Exception(exception_str)
-    #     default_pose=self.get_default_pose()
-    #     # print("right hand grasp!!!!")
-    #     # action= [1.174, 1.0]+[0] * 3+[0.167, 0.664]+[0] * 3+[0.39, 0.534]
-    #     # qpos = self.left_hand_action_to_pose(action,default_pose)
-    #     action= self.left_hand_pinch_joint
-    #     qpos = self.left_hand_action_to_pose(action,default_pose,low_joint=True)
-
-    #     # del_action = (np.array(qpos)-self.robot.get_qpos()[0, :38].cpu().numpy())/t
-    #     self.delta_pinch_action_left = (np.array(qpos)-default_pose)/t
-    #     for i in range(t):
-    #         hand_joint =self.get_hand_joint("left")
-    #         default_pose = self.left_hand_action_to_pose(hand_joint,default_pose)
-    #         obs, reward, terminated, truncated, info = self.env.step(default_pose+self.delta_pinch_action_left)
-    #         if self.vis:
-    #             self.base_env.render()
-    #         if self.save_video:
-    #             rgb = self.env.unwrapped.render_rgb_array()
-    #             self.images.append(rgb)
-    #     for j in range(15):
-    #         hand_joint =self.get_hand_joint("left")
-    #         default_pose = self.left_hand_action_to_pose(hand_joint,default_pose)
-    #         obs, reward, terminated, truncated, info = self.env.step(qpos)
-    #         if self.vis:
-    #             self.base_env.render()
-    #         if self.save_video:
-    #             rgb = self.env.unwrapped.render_rgb_array()
-    #             self.images.append(rgb)
-    #     self.gripper_state[0] = HandState.PINCH
-
-    # def right_hand_pinch(self, t=50):
-    #     if self.gripper_state[1] != HandState.PRE_PINCH:
-    #         exception_str = "right hand is not in pre-grasp state. Cannot grasp."
-    #         print(exception_str)
-    #         raise Exception(exception_str)
-    #     default_pose=self.get_default_pose()
-    #     # print("right hand grasp!!!!")
-    #     # action=[1.174, 1.0]+[0] * 3+[0.167, 0.664]+[0] * 3+[0.39, 0.534]
-    #     # qpos = self.right_hand_action_to_pose(action,default_pose)
-    #     action=self.right_hand_pinch_joint
-    #     qpos = self.right_hand_action_to_pose(action,default_pose,low_joint=True)
-    #     # del_action = (np.array(qpos)-self.robot.get_qpos()[0, :38].cpu().numpy())/t
-    #     self.delta_pinch_action_right = (np.array(qpos)-default_pose)/t
-    #     for i in range(t):
-    #         hand_joint =self.get_hand_joint("right")
-    #         default_pose = self.right_hand_action_to_pose(hand_joint,default_pose)
-    #         obs, reward, terminated, truncated, info = self.env.step(default_pose+self.delta_pinch_action_right)
-    #         if self.vis:
-    #             self.base_env.render()
-    #         if self.save_video:
-    #             rgb = self.env.unwrapped.render_rgb_array()
-    #             self.images.append(rgb)
-    #     for j in range(15):
-    #         hand_joint =self.get_hand_joint("right")
-    #         default_pose = self.right_hand_action_to_pose(hand_joint,default_pose)
-    #         obs, reward, terminated, truncated, info = self.env.step(default_pose+self.delta_pinch_action_right)
-    #         if self.vis:
-    #             self.base_env.render()
-    #         if self.save_video:
-    #             rgb = self.env.unwrapped.render_rgb_array()
-    #             self.images.append(rgb)
-    #     self.gripper_state[1] = HandState.PINCH
+   
     
     def left_hand_pinch(self, t=50):
         if self.gripper_state[0] != HandState.PRE_PINCH:
@@ -2200,14 +1766,7 @@ class HumanoidMotionPlanner:
     def left_follow_path(self, result, refine_steps: int = 0):
         n_step = result["position"].shape[0]
         default_pose =self.get_default_pose()        
-        # if self.gripper_state[0] == HandState.GRASP:
-        #     action=[1.3, 0.931, 1.02, 1.027, 1.023,0.279, 0.797, 0.814, 0.815, 0.818, 0.27,0.278]
-        #     default_pose = self.left_hand_action_to_pose(action)
-        # else:
-        #     default_pose = self.robot.get_qpos()[0, :38].cpu().numpy()
-        # if self.gripper_state[1] == HandState.PINCH:
-        #     if self.delta_pinch_action_right is not None:
-        #         default_pose = default_pose+self.delta_pinch_action_right*3
+
 
         path_point=np.array([[]])
         for i in range(n_step):
@@ -2342,19 +1901,6 @@ class HumanoidMotionPlanner:
         n_step_right = result_right["position"].shape[0]
         # default_pose = self.robot.get_qpos()[0, :38].cpu().numpy()
 
-        # if self.gripper_state[0] == HandState.GRASP:
-        #     action=[1.3, 0.931, 1.02, 1.027, 1.023,0.279, 0.797, 0.814, 0.815, 0.818, 0.27,0.278]
-        #     default_pose = self.left_hand_action_to_pose(action,default_pose)
-        # elif self.gripper_state[0] == HandState.PINCH:
-        #     if self.delta_pinch_action_left is not None:
-        #         default_pose = default_pose+self.delta_pinch_action_left*3
-            
-        # if self.gripper_state[1] == HandState.GRASP:
-        #     action=[1.3, 0.931, 1.02, 1.027, 1.023,0.279, 0.797, 0.814, 0.815, 0.818, 0.27,0.278]
-        #     default_pose = self.right_hand_action_to_pose(action,default_pose)
-        # elif self.gripper_state[1] == HandState.PINCH:
-        #     if self.delta_pinch_action_right is not None:
-        #         default_pose = default_pose+self.delta_pinch_action_right*3
         
         default_pose = self.get_default_pose()
         path_point=np.array([[]])
