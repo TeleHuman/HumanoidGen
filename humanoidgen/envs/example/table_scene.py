@@ -43,6 +43,8 @@ from scipy.spatial.transform import Rotation
 import pytorch3d.ops as torch3d_ops
 import pickle
 import time
+import re
+
 
 class StateInfo:
     assets= None
@@ -234,6 +236,10 @@ class TableEnv(BaseEnv):
             success_rate = self.success_count / self.ep_num * 100
             print(f"Execution completed. Success rate: {success_rate:.2f}%")
             import json
+
+            # Ensure the directory exists
+            os.makedirs(os.path.dirname(self.results_file), exist_ok=True)
+            
             # Save the results to a file
             with open(self.results_file, "w") as file:
                 json.dump({"success_rate": success_rate, "results": self.execution_results}, file, indent=4)
@@ -323,7 +329,15 @@ class TableEnv(BaseEnv):
                 self.record_data = self.run_config["default"]["record_data"]
                 self.pcd_down_sample_num = self.run_config["default"]["pcd_down_sample_num"]
                 self.record_freq = self.run_config["default"]["record_freq"]
-                self.record_env_name = self.run_config["env_id"]
+                
+                if "env_id" in self.run_config:
+                    self.record_env_name = self.run_config["env_id"]
+                elif hasattr(self, "env_name"):
+                    self.record_env_name = self.env_name
+                else:
+                    print("Warning: env_id and env_name is not set")
+                    class_name = self.__class__.__name__
+                    self.record_env_name=re.sub(r'(?<!^)(?=[A-Z])', '_', class_name).lower()
 
                 self.random_once= self.run_config["default"]["random_once"]
                 current_time = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -426,9 +440,10 @@ class TableSetting(TableEnv):
     
     def action_to_qpos(self,action):
         qpos = np.zeros(38)
-        # left hand
+        # left arm
         for i,index in enumerate(self.agent.left_arm_joint_indexes):
             qpos[index]=action[i]
+        # left hand
         qpos[14]=action[7]
         qpos[[24, 34, 36]]=action[8]
         qpos[[15, 25]]=action[9]
@@ -436,9 +451,10 @@ class TableSetting(TableEnv):
         qpos[[17, 27]]=action[11]
         qpos[[18, 28]]=action[12]
 
-        # right hand
+        # right arm
         for i,index in enumerate(self.agent.right_arm_joint_indexes):
             qpos[index]=action[i+13]
+        # right hand
         qpos[19]=action[20]
         qpos[[29, 35, 37]] =action[21]
         qpos[[20, 30]]=action[22]
@@ -490,11 +506,7 @@ class TableSetting(TableEnv):
             return CameraConfig(
                 "render_camera",
                 sapien.Pose(
-                    # [4.279123, -1.303438, 1.54794], [0.252428, 0.396735, 0.114442, -0.875091]
-                    # [3.85513, -3.61328, 1.65987], [0.474556, -0.22859, 0.129117, 0.840162]
-                    # [-0.783699, -0.620182, 0.532466], [0.795576, -0.171838, 0.264218, 0.517416]
-                    # [-0.0609344, -0.741636, 0.353377], [0.493313, -0.345343, 0.222166, 0.766826]
-                [-0.135307, -0.710533, 0.446276], [0.54266, -0.109031, 0.0713047, 0.829788]
+                    [-0.135307, -0.710533, 0.446276], [0.54266, -0.109031, 0.0713047, 0.829788]
                 ),
                 1024,1024,
                 # 512,512,
@@ -520,9 +532,6 @@ class TableSetting(TableEnv):
         head_cam_forward = np.array([1,0,-2]) / np.linalg.norm(np.array([1,0,-2]))
         head_cam_left =  np.array([0,1,0]) / np.linalg.norm(np.array([0,1,0]))
         head_up = np.cross(head_cam_forward, head_cam_left)
-        # head_cam_left = np.cross([0, 0, 1], head_cam_forward)
-        # head_cam_left = head_cam_left / np.linalg.norm(head_cam_left)
-        # head_up = np.cross(head_cam_forward, head_cam_left)
         head_mat44 = np.eye(4)
         head_mat44[:3, :3] = np.stack([head_cam_forward, head_cam_left, head_up], axis=1)
         head_mat44[:3, 3] = head_cam_pos
@@ -670,10 +679,11 @@ class TableSetting(TableEnv):
         pcd_array,index = conbine_pcd[:,:3], np.array(range(len(conbine_pcd)))
         
         if self.pcd_down_sample_num > 0:
-            # shape: (501422, 6)-> (pcd_down_sample_num, 6)
-            
-            pcd_array,index = fps(conbine_pcd[:,:3],self.pcd_down_sample_num)
-            index = index.detach().cpu().numpy()[0]
+            if conbine_pcd.shape[0] > self.pcd_down_sample_num:
+                # shape: e.g. (501422, 6)-> (pcd_down_sample_num, 6)
+                pcd_array,index = fps(conbine_pcd[:,:3],self.pcd_down_sample_num)
+                index = index.detach().cpu().numpy()[0]
+
         # if self.save_type.get('raw_data', True):
         # ensure_dir(self.file_path["t_pcd"] + f"{self.PCD_INDEX}.pcd")
         # o3d.io.write_point_cloud(self.file_path["t_pcd"] + f"{self.PCD_INDEX}.pcd", self.arr2pcd(head_pcd[:,:3], head_pcd[:,3:])) 
@@ -684,8 +694,10 @@ class TableSetting(TableEnv):
         #     o3d.io.write_point_cloud(self.file_path["conbine_pcd"] + f"{self.PCD_INDEX}.pcd", self.arr2pcd(pcd_array, conbine_pcd[index,3:]))
 
         # if self.save_type.get('pkl' , True):
-        pkl_dic["pointcloud"] = conbine_pcd[index]
-
+        if conbine_pcd.shape[0] > 0:
+            pkl_dic["pointcloud"] = conbine_pcd[index]
+        else:
+            pkl_dic["pointcloud"] = conbine_pcd
 
         head_rgba = self._get_camera_rgba(self.head_camera)
         pkl_dic["observation"]["head_camera"]["rgb"] = np.squeeze(head_rgba)[:,:,:3]   #[1,..,H, W, 4] -> [H, W, 3]
@@ -698,30 +710,10 @@ class TableSetting(TableEnv):
         self.env_seed = seed
 
     def apply_dp3(self, model):
-        # breakpoint()
-        # 重置场景
-        self.reset(seed=self.env_seed)
-        init_scene_step=50
-        for i in range(init_scene_step):
-            self.render()
-            defalt_pose = self.agent.robot.get_qpos()[0, :38].cpu().numpy()
-            obs, reward, terminated, truncated, info = self.step(defalt_pose)
-        
-        while True:
-            # 场景是否初始化成功
-            start_task_flag=self.start_task()
-            if start_task_flag == True:
-                break
-            else:
-                self.reset(seed=self.env_seed)
-                init_scene_step=50
-                for i in range(init_scene_step):
-                    self.render()
-                    defalt_pose = self.agent.robot.get_qpos()[0, :38].cpu().numpy()
-                    obs, reward, terminated, truncated, info = self.step(defalt_pose)
+        self.init_task_scene()
         
         print("Asset init state: ", self.get_asset_state())
-        show_joint_state = True
+        show_joint_state = False
         visualize_pcd = False
         run_sccess = False
 
@@ -732,16 +724,21 @@ class TableSetting(TableEnv):
         if visualize_pcd:
             vis = o3d.visualization.Visualizer()
             vis.create_window()
+
+        max_play_num = 40    
+        if hasattr(self, "env_name"):
+            if self.env_name == "blocks_stack_hard":
+                max_play_num=70
+                print("blocks_stack_hard: max_play_num set to 70")
+    
         # 运行模型
-        for i in range(40):
+        for i in range(max_play_num):
             observation = self.get_obs_now() 
-            
             obs = dict()
             # breakpoint()
             obs['point_cloud'] = observation['pointcloud']
             obs['agent_pos'] = observation['joint_state']
             # if i==0:
-            # 第一次预测使用数据集，因为每次的初始位置相同（避免pre操作没有捕获）
             # with open(str(ROOT_PATH/f'datasets/{self.dp3_data_file}/episode2/{i}.pkl'), 'rb') as file:
             # with open(str(ROOT_PATH/f'datasets/dual_bottles_pick_easy_20250506_235755_pkl/episode2/{i*6}.pkl'), 'rb') as file:
             #     data = pickle.load(file)
@@ -758,12 +755,9 @@ class TableSetting(TableEnv):
                 pcd.points = o3d.utility.Vector3dVector(obs['point_cloud'][:,:3])
                 pcd.colors = o3d.utility.Vector3dVector(obs['point_cloud'][:,3:])
                 vis.add_geometry(pcd)
-                # 更新可视化器中的点云
                 # vis.update_geometry(pcd)
                 vis.poll_events()
                 vis.update_renderer()
-
-                # 等待一段时间（可根据需要调整）
                 time.sleep(0.1)
             # 
             # breakpoint()
@@ -838,25 +832,23 @@ class TableSetting(TableEnv):
             if self.check_success():
                 run_sccess=True
                 break
+        self.end_task(save_file=f"eval_dp3/{self.env_name}")
         model.env_runner.reset_obs()
-
-        self.end_task(save_video=True,save_file=self.env_name)
-        
         if visualize_pcd:
             vis.destroy_window()
         if show_joint_state:
             import numpy as np
-            all_actions = np.array(all_actions)  # 转换为 numpy 数组
-            all_state = np.array(all_state)  # 转换为 numpy 数组
-            state_old = np.array(state_old)  # 转换为 numpy 数组
+            all_actions = np.array(all_actions)  
+            all_state = np.array(all_state)  
+            state_old = np.array(state_old)  
+            
             import matplotlib.pyplot as plt
-            # 绘制 actions 的变化
             plt.figure(figsize=(10, 6))
-            for i in range(all_actions.shape[-1]):  # 遍历每个动作维度
+            for i in range(all_actions.shape[-1]):  
                 plt.plot(all_actions[:,  i], label=f"Action Dimension {i+1}")
-            for i in range(all_state.shape[-1]):  # 遍历每个动作维度
+            for i in range(all_state.shape[-1]):  
                 plt.plot(all_state[:,  i], label=f"State Dimension {i+1}")
-            for i in range(state_old.shape[-1]):  # 遍历每个动作维度
+            for i in range(state_old.shape[-1]):  
                 plt.plot(state_old[:,  i], label=f"State Old Dimension {i+1}")
 
             plt.xlabel("Step")
@@ -895,35 +887,8 @@ class TableSetting(TableEnv):
 
 
     def apply_dp(self, model):
-        # 重置场景
-        self.reset(seed=self.env_seed)
-        init_scene_step=50
-        for i in range(init_scene_step):
-            self.render()
-            defalt_pose = self.agent.robot.get_qpos()[0, :38].cpu().numpy()
-            obs, reward, terminated, truncated, info = self.step(defalt_pose)
-
-            # observation = self.get_obs_now() 
-            # obs['head_cam'] = observation['observation']["head_camera"]['rgb']
-            # obs['head_cam'] = np.moveaxis(obs['head_cam'], -1, 0)
-            # obs['agent_pos'] = observation['joint_state']
-            # # fake obs['head_cam']
-            # obs['head_cam'] = np.random.rand(3, 480, 640)
-            # model.update_obs(obs)
         
-        while True:
-            # 场景是否初始化成功
-            start_task_flag=self.start_task()
-            if start_task_flag == True:
-                break
-            else:
-                self.reset(seed=self.env_seed)
-                init_scene_step=50
-                for i in range(init_scene_step):
-                    self.render()
-                    defalt_pose = self.agent.robot.get_qpos()[0, :38].cpu().numpy()
-                    obs, reward, terminated, truncated, info = self.step(defalt_pose)
-        
+        self.init_task_scene()
         print("Asset init state: ", self.get_asset_state())
         show_joint_state = False
         visualize_pcd = False
@@ -934,12 +899,9 @@ class TableSetting(TableEnv):
         all_state = []
         state_old = []
         vis = None
-        if visualize_pcd:
-            vis = o3d.visualization.Visualizer()
-            vis.create_window()
 
-        # import numpy as np
-        # 运行模型
+
+
         for i in range(40):
             observation = self.get_obs_now() 
             obs = dict()
@@ -947,91 +909,20 @@ class TableSetting(TableEnv):
             obs['head_cam'] = np.moveaxis(obs['head_cam'], -1, 0)
             obs['agent_pos'] = observation['joint_state']
 
-            # fake obs['head_cam']
-            # obs['head_cam'] = np.random.rand(3, 480, 640)
-            # print(observation['observation'].keys())
-            # print(observation['observation']["head_camera"].keys())
-            # print(observation['observation']["head_camera"]['rgb'].shape)
-            # print(obs['head_cam'].shape)
-            # print(type(obs['head_cam']))
-            # print(observation['pointcloud'].shape)
-            # input()
 
-            # if i==0:
-            # 第一次预测使用数据集，因为每次的初始位置相同（避免pre操作没有捕获）
-            # with open(str(ROOT_PATH/f'datasets/{self.dp3_data_file}/episode2/{i}.pkl'), 'rb') as file:
-            #     data = pickle.load(file)
-            # obs['agent_pos'] = data['joint_state']
-            # obs['point_cloud'] = data['pointcloud'][:,:]
-            # else:
-            #     obs['agent_pos'] = observation['joint_state']
-            if visualize_pcd:
-                # pcd = o3d.geometry.PointCloud()
-                # pcd.points = o3d.utility.Vector3dVector(obs['point_cloud'][:,:3])
-                # pcd.colors = o3d.utility.Vector3dVector(obs['point_cloud'][:,3:])
-                # o3d.visualization.draw_geometries([pcd])
-                pcd = o3d.geometry.PointCloud()
-                pcd.points = o3d.utility.Vector3dVector(obs['point_cloud'][:,:3])
-                pcd.colors = o3d.utility.Vector3dVector(obs['point_cloud'][:,3:])
-                vis.add_geometry(pcd)
-                # 更新可视化器中的点云
-                # vis.update_geometry(pcd)
-                vis.poll_events()
-                vis.update_renderer()
-
-                # 等待一段时间（可根据需要调整）
-                time.sleep(0.1)
-            # print(obs.keys())
-            # input()
-            # import ipdb; ipdb.set_trace()
             actions = model.get_action(obs)
+
             qpos = self.agent.robot.get_qpos()[0, :38].cpu().numpy()
             
-            # 插值 ######################################################################3
-            # actions = self.interpolate_actions(actions, qpos, interval = 0.0005)
-            # ###############################################################################3
-
-            # breakpoint()
-            # import numpy as np
-            # actions=[]
-            # for i in range(6):
-            #     actions.append(np.zeros(26))
-            # print(actions.shape)
-            # input()
-            
-            # 直接使用其中一个动作
-            # print("actions:",actions)
-            # action_target = self.action_to_qpos(actions[1])
-            # defalt_pose = self.agent.robot.get_qpos()[0, :38].cpu().numpy()
-            # delta_action = (action_target - defalt_pose)/5
-            # for j in range(5):
-            #     defalt_pose = defalt_pose + delta_action
-            #     obs, reward, terminated, truncated, info = self.step(action_target)
-            #     # if i%10==0:
-            #     self.render()
-
-            # # 按照顺序执行
-            # breakpoint()
-            # print(len(actions))
             for k in range(len(actions)):
-            # for k in range():
-                # if k==0 :
-                #     continue
+
                 state_old.append(self.agent.robot.get_qpos()[0, :38].cpu().numpy()[0:4])
                 action_target = self.action_to_qpos(actions[k])
-                all_actions.append(action_target[0:4])
 
-                defalt_pose = self.agent.robot.get_qpos()[0, :38].cpu().numpy()
-                delta_action = (action_target - defalt_pose)/30.0
                 for j in range(20):
-                    defalt_pose = defalt_pose + delta_action
                     obs, reward, terminated, truncated, info = self.step(action_target)
                     self.render()
 
-                    # if self.check_failure():
-                    #     run_failure=True
-                    #     print("!!!!!! fail !!!!!!!!")
-                    #     return run_sccess, run_failure
 
                 all_state.append(self.agent.robot.get_qpos()[0, :38].cpu().numpy()[0:4])
                 
@@ -1043,49 +934,29 @@ class TableSetting(TableEnv):
                     obs['agent_pos'] = observation['joint_state']
 
                     model.update_obs(obs)
-                    # fake obs['head_cam']
-                    # obs['head_cam'] = np.random.rand(3, 480, 640)
-
-            # for i in range(len(actions)):
-            #     defalt_pose = self.agent.robot.get_qpos()[0, :38].cpu().numpy()
-            #     defalt_pose_low = self.qpos_to_action(defalt_pose)
-            #     action_target = actions[i]
-            #     all_actions.append(action_target)
-            #     all_state.append(defalt_pose_low)
-            #     action_target = self.action_to_qpos(action_target)
-            #     delta_action = (action_target - defalt_pose)/10
-            #     # obs, reward, terminated, truncated, info = self.step(action_target)
-            #     for j in range(10):
-            #         defalt_pose = defalt_pose + delta_action
-            #         # print("action_target:",action_target)
-            #         obs, reward, terminated, truncated, info = self.step(action_target)
-            #         self.render()
             
             if self.check_success():
-                # input()
                 run_sccess=True
                 break
-            # if self.check_failure() exists, run this check
             
+        self.end_task(save_file=f"eval_dp/{self.env_name}")
         model.runner.reset_obs()
+    
 
-        self.end_task(save_video=True,save_file=self.env_name)
-        
         if visualize_pcd:
             vis.destroy_window()
         if show_joint_state:
-            # import numpy as np
-            all_actions = np.array(all_actions)  # 转换为 numpy 数组
-            all_state = np.array(all_state)  # 转换为 numpy 数组
-            state_old = np.array(state_old)  # 转换为 numpy 数组
+            all_actions = np.array(all_actions)  
+            all_state = np.array(all_state)    
+            state_old = np.array(state_old)  
             import matplotlib.pyplot as plt
-            # 绘制 actions 的变化
+
             plt.figure(figsize=(10, 6))
-            for i in range(all_actions.shape[-1]):  # 遍历每个动作维度
+            for i in range(all_actions.shape[-1]): 
                 plt.plot(all_actions[:,  i], label=f"Action Dimension {i+1}")
-            for i in range(all_state.shape[-1]):  # 遍历每个动作维度
+            for i in range(all_state.shape[-1]):  
                 plt.plot(all_state[:,  i], label=f"State Dimension {i+1}")
-            for i in range(state_old.shape[-1]):  # 遍历每个动作维度
+            for i in range(state_old.shape[-1]):  
                 plt.plot(state_old[:,  i], label=f"State Old Dimension {i+1}")
 
             plt.xlabel("Step")
@@ -1574,6 +1445,8 @@ class TableSetting(TableEnv):
             loader: sapien.URDFLoader = self.scene.create_urdf_loader()
             # 2. set the loader parameters
             loader.load_multiple_collisions_from_file = True
+
+            # loader.multiple_collisions_decomposition = "coacd"
             # builder.fix_root_link = True
             # builder.initial_pose = sapien.Pose(p=[0, 0, 0])
             urdf_path = str(
@@ -1589,6 +1462,7 @@ class TableSetting(TableEnv):
             #     loader.scale =obj_scale
             loader.scale =obj_scale
             loader.density = 10
+
             # if "box" in asset_info["file_name"]:
             #     loader.density = 0.001
             # elif "laptop" in asset_info["file_name"]:
@@ -1598,6 +1472,7 @@ class TableSetting(TableEnv):
                 # urdf_path, config={"density": 100}
                 urdf_path
             )
+
             for joint in instance.get_joints():
                 if "laptop" in asset_info["file_name"]:
                     # joint.set_friction(0.1)

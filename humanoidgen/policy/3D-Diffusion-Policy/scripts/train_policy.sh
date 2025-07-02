@@ -37,7 +37,7 @@ export HYDRA_FULL_ERROR=1
 export CUDA_VISIBLE_DEVICES=${gpu_id}
 
 python train.py --config-name=${config_name}.yaml \
-                            task=whatever \
+                            task=dp3_task \
                             task.name=${task_name} \
                             task.dataset.zarr_path="${SCRIPT_DIR}/data/${task_name}.zarr" \
                             task.dataset.max_train_episodes=${expert_data_num} \

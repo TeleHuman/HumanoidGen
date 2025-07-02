@@ -106,7 +106,7 @@ training:
   gradient_accumulate_every: 1
   use_ema: True
   rollout_every: 200
-  checkpoint_every: 100 # 500
+  checkpoint_every: 500 # 500
   val_every: 1
   sample_every: 20
   max_train_steps: null
@@ -151,5 +151,11 @@ checkpoint_num: 3000
 expert_data_num: ???
 raw_task_name: none
 head_camera_type: none
+
+model_weight_format: "ckpt" # ckpt, pth
+test_seed: ??? # The seed for the test set
+test_num: 60
+checkpoint_path: null
+save_results_path: null
 
 task_name_base: ???

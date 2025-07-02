@@ -45,7 +45,6 @@ dataset:
   batch_size: ${dataloader.batch_size}
   pad_before: ${eval:'${n_obs_steps}-1'}
   pad_after: ${eval:'${n_action_steps}-1'}
-  seed: 42
-  val_ratio: 0.2
-  # val_ratio: 0
+  seed: 0
+  val_ratio: 0.0
   max_train_episodes: ???

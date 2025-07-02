@@ -1,12 +1,7 @@
-code_id: run_solve            # Unique identifier for the code
-env_id: blocks_stack_easy
-max_init_scene_num: 10   # Maximum number of steps to initialize the scene
-# run_solve specofic settings
-solve_folder: blocks_stack_easy
-debug_key_frame: false
+exe_num: 20
 show_key_points: false
-max_episodes: 100
-exe_until_max_episodes_success: true
+debug_key_frame: false
+max_init_scene_num: 10   # Maximum number of steps to initialize the scene
 
 # maniskill specific settings
 obs_mode: null
@@ -32,10 +27,10 @@ camera_config:
 
 default:
   env_seed: 0         
-  render_scene: true
-  random_scene: true              
+  render_scene: false
+  random_scene: true           
   random_once: false              
-  record_data: true              
+  record_data: false            
   calculate_success_rate: true
   # initialize scene step parameters
   init_scene: true  

@@ -265,8 +265,8 @@ class Solver(object):
                 if self.env.check_success():
                     break
             
-            planner.end_planner()
             self.env.end_task(save_file=f"generate_mcts/{self.env_name}")
+            planner.end_planner()
             
             success = self.env.check_success()
             status_icon = "✅" if success else "❌"

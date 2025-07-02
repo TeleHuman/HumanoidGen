@@ -1,5 +1,5 @@
 code_id: run_scene      # Unique identifier for the code
-env_id: block_handover
+env_id: blocks_stack_easy
 max_init_scene_num: 10   # Maximum number of steps to initialize the scene
 
 # maniskill specific settings
@@ -26,7 +26,7 @@ camera_config:
 
 default:
   env_seed: 0         
-  render_scene: false
+  render_scene: true
   random_scene: true              
   random_once: false              
   record_data: false              
@@ -38,7 +38,7 @@ default:
   end_scene: true
   end_scene_step_num: 20
   # 
-  save_video: True
+  save_video: true
   save_when_fail: false
   record_env_name: ""            
   record_freq: 10                 

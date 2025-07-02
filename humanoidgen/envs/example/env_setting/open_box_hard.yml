@@ -1,0 +1,7 @@
+# run_solve,dp3,dp
+use_random_range: True
+random_range: [-0.02, 0.02, 0.04, -0.04]
+use_random_angle: False
+random_angle: [-25, 25]
+use_default_angle: True
+default_angle: 30

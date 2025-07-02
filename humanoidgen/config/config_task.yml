@@ -50,9 +50,9 @@ handover_and_storage: First, move the left hand to grasp the drawer. Then, open
   Then open the left hand to release the rectangular_cube0. Move the left hand to grasp the drawer. Then, close the
   drawer to an openness of 0 with the left hand. Finally,
   open the left hand to release the drawer.
-handover_and_storage_coopration: First, move the left hand to grasp the drawer and
+handover_and_storage_cooperation: First, move the left hand to grasp the drawer and
   move the right hand to pinch the rectangular_cube0 simultaneously. Then, 
-  move the rectangular_cube0 to the “target” pose with the right hand, and open the drawer with the left hand to an openness of 0.9 simultaneously. Open the left hand to release the drawer. Move the left hand to pinch the rectangular_cube0.
+  move the rectangular_cube0 to the “target” pose with the right hand, and open the drawer with the left hand to an openness of 0.9 simultaneously. Open the left hand to release the drawer. Move the left hand and pinch the rectangular_cube0.
   Then open the right hand to release the rectangular_cube0 to the left hand. Use the left hand to move the rectangular_cube0 to be
   0.08m in front of, 0.1m above the drawer. Then open the left hand to release the rectangular_cube0. Move the left
   hand to grasp the drawer. Then, close the drawer to an openness of 0 with the

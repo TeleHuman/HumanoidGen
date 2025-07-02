@@ -1,6 +1,8 @@
 dataset_names: [
-  block_handover_20250613_002945,
+  blocks_stack_easy_20250703_031929_pkl,
 ] # base path: humanoidgen/datasets
 episode_num: [0,100]
-dp: true
+dp: false
+dp_downsample: 2
 dp3: true
+dp3_downsample: 1

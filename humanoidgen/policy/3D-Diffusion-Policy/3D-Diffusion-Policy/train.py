@@ -40,6 +40,7 @@ from diffusion_policy_3d.common.checkpoint_util import TopKCheckpointManager
 from diffusion_policy_3d.common.pytorch_util import dict_apply, optimizer_to
 from diffusion_policy_3d.model.diffusion.ema_model import EMAModel
 from diffusion_policy_3d.model.common.lr_scheduler import get_scheduler
+from humanoidgen import ROOT_PATH
 import pdb
 
 OmegaConf.register_new_resolver("eval", eval, replace=True)
@@ -282,15 +283,24 @@ class TrainDP3Workspace:
             if ((self.epoch + 1) % cfg.training.checkpoint_every) == 0 and cfg.checkpoint.save_ckpt:
                 
                 if not cfg.policy.use_pc_color:
-                    if not os.path.exists(f'{ROOT_DIR}/3D-Diffusion-Policy/checkpoints/{self.cfg.task.name}_{cfg.training.seed}'):
-                        os.makedirs(f'{ROOT_DIR}/3D-Diffusion-Policy/checkpoints/{self.cfg.task.name}_{cfg.training.seed}')
-                    save_path = f'{ROOT_DIR}/3D-Diffusion-Policy/checkpoints/{self.cfg.task.name}_{cfg.training.seed}/{self.epoch + 1}.ckpt'
+                    if not os.path.exists(f'{ROOT_DIR}/3D-Diffusion-Policy/checkpoints/{self.cfg.task.name}'):
+                        os.makedirs(f'{ROOT_DIR}/3D-Diffusion-Policy/checkpoints/{self.cfg.task.name}')
+                    save_path = f'{ROOT_DIR}/3D-Diffusion-Policy/checkpoints/{self.cfg.task.name}/{self.epoch + 1}.ckpt'
                 else:
-                    if not os.path.exists(f'{ROOT_DIR}/3D-Diffusion-Policy/checkpoints/{self.cfg.task.name}_w_rgb_{cfg.training.seed}'):
-                        os.makedirs(f'{ROOT_DIR}/3D-Diffusion-Policy/checkpoints/{self.cfg.task.name}_w_rgb_{cfg.training.seed}')
-                    save_path = f'{ROOT_DIR}/3D-Diffusion-Policy/checkpoints/{self.cfg.task.name}_w_rgb_{cfg.training.seed}/{self.epoch + 1}.ckpt'
+                    if not os.path.exists(f'{ROOT_DIR}/3D-Diffusion-Policy/checkpoints/{self.cfg.task.name}_w_rgb'):
+                        os.makedirs(f'{ROOT_DIR}/3D-Diffusion-Policy/checkpoints/{self.cfg.task.name}_w_rgb')
+                    save_path = f'{ROOT_DIR}/3D-Diffusion-Policy/checkpoints/{self.cfg.task.name}_w_rgb/{self.epoch + 1}.ckpt'
 
                 self.save_checkpoint(save_path)
+
+                #  pth
+                checkpoint = {
+                'model_state_dict': policy.state_dict(),  # 模型参数
+                }
+                save_path = f"{ROOT_DIR}/3D-Diffusion-Policy/checkpoints/{cfg.task.name}"
+                os.makedirs(save_path, exist_ok=True)
+                save_path = save_path+f"/{self.epoch + 1}.pth"
+                torch.save(checkpoint, save_path)
                 
 
             # ========= eval end for this epoch ==========
@@ -305,25 +315,33 @@ class TrainDP3Workspace:
             del step_log
 
     def get_policy_and_runner(self, cfg, checkpoint_num=3000):
-        # load the latest checkpoint
         
+        # load the latest checkpoint
         cfg = copy.deepcopy(self.cfg)
         env_runner: BaseRunner
         env_runner = hydra.utils.instantiate(
             cfg.task.env_runner,
             output_dir=self.output_dir)
         assert isinstance(env_runner, BaseRunner)
-        breakpoint()
-        if not cfg.policy.use_pc_color:
-            ckpt_file = pathlib.Path(f'/data/siyuan/projects_in_data/robotwin/RoboTwin/policy/3D-Diffusion-Policy/checkpoints/{cfg.task.name}_{cfg.training.seed}/{checkpoint_num}.ckpt')
-        else:
-            ckpt_file = pathlib.Path(f'/data/siyuan/projects_in_data/robotwin/RoboTwin/policy/3D-Diffusion-Policy/checkpoints/{cfg.task.name}_{cfg.training.seed}/{checkpoint_num}.ckpt')
+
+        if cfg.model_weight_format == 'ckpt':
+                ckpt_file = pathlib.Path(f'{cfg.checkpoint_path}/{cfg.task_name_base}/{cfg.task.name}/{cfg.checkpoint_num}.ckpt')
+        elif cfg.model_weight_format == 'pth':
+            ckpt_file = pathlib.Path(f'{cfg.checkpoint_path}/{cfg.task_name_base}/{cfg.task.name}/{cfg.checkpoint_num}.pth')
+        
         assert ckpt_file.is_file(), f"ckpt file doesn't exist, {ckpt_file}"
         
         if ckpt_file.is_file():
-            cprint(f"Resuming from checkpoint {ckpt_file}", 'magenta')
-            self.load_checkpoint(path=ckpt_file)
-        
+            if cfg.model_weight_format == 'ckpt':
+                cprint(f"Resuming from checkpoint {ckpt_file}", 'magenta')
+                self.load_checkpoint(path=ckpt_file)
+            elif cfg.model_weight_format == 'pth':
+                cprint(f"Loading model from {ckpt_file}", 'magenta')
+                checkpoint = torch.load(ckpt_file)
+                self.model.load_state_dict(checkpoint['model_state_dict'])
+                if self.ema_model is not None:
+                    self.ema_model.load_state_dict(checkpoint['model_state_dict'])
+
         policy = self.model
         if cfg.training.use_ema:
             policy = self.ema_model

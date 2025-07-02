@@ -1,0 +1,15 @@
+# run, dp3
+use_random_range: True
+random_range: [-0.02, 0.02, 0.04, -0.04]
+use_random_angle: False
+random_angle: [-25, 25]
+use_default_angle: True
+default_angle: 30
+
+# dp
+# use_random_range: True
+# random_range: [-0.05, 0.05, 0.18, -0.18]
+# use_random_angle: True
+# random_angle: [-25, 25]
+# use_default_angle: False
+# default_angle: 0

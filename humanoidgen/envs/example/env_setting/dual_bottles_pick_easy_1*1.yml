@@ -1,6 +1,0 @@
-use_random_range: True
-random_range: [-0.005,0.005,-0.005,0.005]
-use_random_angle: False
-random_angle: []
-use_default_angle: True
-default_angle: 0

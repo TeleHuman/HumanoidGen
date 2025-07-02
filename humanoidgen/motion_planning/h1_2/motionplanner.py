@@ -364,6 +364,7 @@ class HumanoidMotionPlanner:
                 point_name = "grasp_point_base_right_hand"
             elif self.gripper_state[1] == HandState.PINCH:
                 point_name = "pinch_point_base_right_hand"
+        
         hand_key_point=get_point_in_env(self.env, point_name=point_name)
         object_key_point=get_point_in_env(self.env, type_name=object_name, obj_id=object_id)
         
@@ -1205,14 +1206,14 @@ class HumanoidMotionPlanner:
         ####
         if hand_name == "right":
             end_effector_frame = "r_hand_base_link"
-            # let hand over the table
-            # ik.AddPositionConstraint(
-            #     self.robot_plant.GetFrameByName("r_hand_base_link"),
-            #     [0, 0, 0],
-            #     self.robot_plant.world_frame(),
-            #     [-100, -100, 0],
-            #     [100, 100, 100],
-            # )
+            # right hand over the table
+            ik.AddPositionConstraint(
+                self.robot_plant.GetFrameByName("r_hand_base_link"),
+                [0, 0, 0],
+                self.robot_plant.world_frame(),
+                [-100, -100, 0],
+                [100, 100, 100],
+            )
             # ik.AddPositionConstraint(
             #     self.robot_plant.GetFrameByName("r_hand_base_link"),
             #     [0, -0.030, 0.045],
@@ -2553,18 +2554,14 @@ class HumanoidMotionPlanner:
             print("Invalid hand selected")
 
     def end_planner(self):
-        # self.planner.end()
-        # self.planner = None
-        # self.env.close()
-        end_scene_step=20
-        defalt_pose = self.get_default_pose()
-        for i in range(end_scene_step):
-            self.env.render()
-            obs, reward, terminated, truncated, info = self.env.step(defalt_pose)
+
+        # end_scene_step=20
+        # defalt_pose = self.get_default_pose()
+        # for i in range(end_scene_step):
+        #     self.env.render()
+        #     obs, reward, terminated, truncated, info = self.env.step(defalt_pose)
 
         if "collision_point_cloud" in self.base_env.scene.actors:
-            # self.base_env.scene.remove_actor(self.collision_point_cloud)
-            # self.env.scene.actors["collision_point_cloud"].remove()
             self.base_env.scene.remove_from_state_dict_registry(self.collision_point_cloud)
             self.env.scene.actors.pop("collision_point_cloud")
             self.collision_point_cloud.remove_from_scene()
@@ -2576,14 +2573,3 @@ class HumanoidMotionPlanner:
             self.base_env.scene.remove_from_state_dict_registry(self.path_point_cloud)
             self.env.scene.actors.pop("path_point_cloud")
             self.path_point_cloud.remove_from_scene()
-        
-
-
-        # if self.save_video:
-        #     images_to_video(
-        #         self.images,
-        #         output_dir="./videos",
-        #         video_name=f"put_apple_into_bowl",
-        #         fps=30,
-        #     )
-        #     del self.images

@@ -37,17 +37,13 @@ OmegaConf.register_new_resolver("eval", eval, replace=True)
         'diffusion_policy','config'))
 )
 def main(cfg: OmegaConf):
-    # resolve immediately so all the ${now:} resolvers
-    # will use the same time.
+    
     head_camera_type = cfg.head_camera_type # example: D435
     head_camera_cfg = get_camera_config(head_camera_type)
     cfg.task.image_shape = [3, head_camera_cfg['h'], head_camera_cfg['w']] # [C, H, W]
     cfg.task.shape_meta.obs.head_cam.shape = [3, head_camera_cfg['h'], head_camera_cfg['w']]
-    # print(cfg.task)
-    # input()
     OmegaConf.resolve(cfg)
-    cfg.task.image_shape = [3, head_camera_cfg['h'], head_camera_cfg['w']]
-    cfg.task.shape_meta.obs.head_cam.shape = [3, head_camera_cfg['h'], head_camera_cfg['w']]
+
 
     cls = hydra.utils.get_class(cfg._target_)
     workspace: BaseWorkspace = cls(cfg)

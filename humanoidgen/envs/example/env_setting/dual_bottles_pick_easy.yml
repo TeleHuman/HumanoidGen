@@ -1,6 +1,15 @@
+# run_solve
 use_random_range: True
-random_range: [-0.005,0.035,-0.025,0.035]
-use_random_angle: False
-random_angle: []
-use_default_angle: True
+random_range: [-0.005,0.005,-0.02,0.02]
+use_random_angle: True
+random_angle: [-15,15]
+use_default_angle: False
 default_angle: 0
+
+# dp,dp3
+# use_random_range: True
+# random_range: [-0.005,0.035,-0.025,0.035]
+# use_random_angle: False
+# random_angle: []
+# use_default_angle: True
+# default_angle: 0

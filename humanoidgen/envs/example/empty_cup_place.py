@@ -46,14 +46,6 @@ class EmptyCupPlaceEnv(TableSetting):
         p0 = self.cup[0].pose.p.numpy()[0]
         p1 = self.plate[0].pose.p.numpy()[0]
         eps = [0.04, 0.04, 0.1]
-        # target_position_0 = [-0.3, 0.08, 0.20]
-        # target_position_1 = [-0.3, -0.08, 0.20]
-        # print("bottle[0] position:", p0)
-        # print("bottle[0] target position:", target_position_0)
-        # print("bottle[1] position:", p1)
-        # print("bottle[1] target position:", target_position_1)
-        # success_0 = all(abs(p0[i] - target_position_0[i]) <= eps[i] for i in range(3))
-        # success_1 = all(abs(p1[i] - target_position_1[i]) <= eps[i] for i in range(3))
         success_1=all(abs(p0[i] - p1[i]) <= eps[i] for i in range(3))
         print("success_0:", success_0)
         print("success_1:", success_1)

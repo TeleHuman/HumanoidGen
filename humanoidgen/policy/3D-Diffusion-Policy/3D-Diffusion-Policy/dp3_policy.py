@@ -7,15 +7,20 @@ if __name__ == "__main__":
     sys.path.append(ROOT_DIR)
     os.chdir(ROOT_DIR)
 
-
 import os
+import sys
+import pathlib
+
+THIS_DIR = pathlib.Path(__file__).parent.resolve()
+DP3_DIR = str(THIS_DIR)
+sys.path.insert(0, DP3_DIR)
+
 import hydra
 import torch
 import dill
 from omegaconf import OmegaConf
-import pathlib
-import sys
-from train import TrainDP3Workspace
+
+from train import TrainDP3Workspace 
 import pdb
 
 OmegaConf.register_new_resolver("eval", eval, replace=True)
