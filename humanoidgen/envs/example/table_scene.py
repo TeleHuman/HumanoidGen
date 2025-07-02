@@ -668,13 +668,8 @@ class TableSetting(TableEnv):
         # if self.data_type.get('pointcloud', False):
         head_pcd = self._get_camera_pcd(self.head_camera, point_num=0)
         front_pcd = self._get_camera_pcd(self.front_camera, point_num=0)
-        # left_pcd = self._get_camera_pcd(self.left_camera, point_num=0)
-        # right_pcd = self._get_camera_pcd(self.right_camera, point_num=0) 
-        # Merge pointcloud
-        # if self.data_type.get("conbine", False):
         conbine_pcd = np.vstack((head_pcd, front_pcd))
-        # else:
-            # conbine_pcd = head_pcd
+
         
         pcd_array,index = conbine_pcd[:,:3], np.array(range(len(conbine_pcd)))
         
@@ -684,16 +679,7 @@ class TableSetting(TableEnv):
                 pcd_array,index = fps(conbine_pcd[:,:3],self.pcd_down_sample_num)
                 index = index.detach().cpu().numpy()[0]
 
-        # if self.save_type.get('raw_data', True):
-        # ensure_dir(self.file_path["t_pcd"] + f"{self.PCD_INDEX}.pcd")
-        # o3d.io.write_point_cloud(self.file_path["t_pcd"] + f"{self.PCD_INDEX}.pcd", self.arr2pcd(head_pcd[:,:3], head_pcd[:,3:])) 
-        # ensure_dir(self.file_path["f_pcd"] + f"{self.PCD_INDEX}.pcd")
-        # o3d.io.write_point_cloud(self.file_path["f_pcd"] + f"{self.PCD_INDEX}.pcd", self.arr2pcd(front_pcd[:,:3], front_pcd[:,3:]))
-        # if self.data_type.get("conbine", False):
-        #     ensure_dir(self.file_path["conbine_pcd"] + f"{self.PCD_INDEX}.pcd")
-        #     o3d.io.write_point_cloud(self.file_path["conbine_pcd"] + f"{self.PCD_INDEX}.pcd", self.arr2pcd(pcd_array, conbine_pcd[index,3:]))
 
-        # if self.save_type.get('pkl' , True):
         if conbine_pcd.shape[0] > 0:
             pkl_dic["pointcloud"] = conbine_pcd[index]
         else:
@@ -738,19 +724,8 @@ class TableSetting(TableEnv):
             # breakpoint()
             obs['point_cloud'] = observation['pointcloud']
             obs['agent_pos'] = observation['joint_state']
-            # if i==0:
-            # with open(str(ROOT_PATH/f'datasets/{self.dp3_data_file}/episode2/{i}.pkl'), 'rb') as file:
-            # with open(str(ROOT_PATH/f'datasets/dual_bottles_pick_easy_20250506_235755_pkl/episode2/{i*6}.pkl'), 'rb') as file:
-            #     data = pickle.load(file)
-            # obs['agent_pos'] = data['joint_state']
-            # obs['point_cloud'] = data['pointcloud'][:,:]
-            # else:
-            #     obs['agent_pos'] = observation['joint_state']
+
             if visualize_pcd:
-                # pcd = o3d.geometry.PointCloud()
-                # pcd.points = o3d.utility.Vector3dVector(obs['point_cloud'][:,:3])
-                # pcd.colors = o3d.utility.Vector3dVector(obs['point_cloud'][:,3:])
-                # o3d.visualization.draw_geometries([pcd])
                 pcd = o3d.geometry.PointCloud()
                 pcd.points = o3d.utility.Vector3dVector(obs['point_cloud'][:,:3])
                 pcd.colors = o3d.utility.Vector3dVector(obs['point_cloud'][:,3:])
@@ -765,25 +740,7 @@ class TableSetting(TableEnv):
             # breakpoint()
             actions = model.get_action(obs)
             
-            # import numpy as np
-            # actions=[]
-            # for i in range(6):
-            #     actions.append(np.zeros(26))
-            # print(actions.shape)
-            # input()
-            
-            # 直接使用其中一个动作
-            # print("actions:",actions)
-            # action_target = self.action_to_qpos(actions[1])
-            # defalt_pose = self.agent.robot.get_qpos()[0, :38].cpu().numpy()
-            # delta_action = (action_target - defalt_pose)/5
-            # for j in range(5):
-            #     defalt_pose = defalt_pose + delta_action
-            #     obs, reward, terminated, truncated, info = self.step(action_target)
-            #     # if i%10==0:
-            #     self.render()
 
-            # # 按照顺序执行
             for k in range(len(actions)):
                 # if k==0 :
                 #     continue
@@ -792,10 +749,10 @@ class TableSetting(TableEnv):
                 # all_actions.append(action_target[0:4])
                 all_actions.append(action_target[0:7])
 
-                defalt_pose = self.agent.robot.get_qpos()[0, :38].cpu().numpy()
-                delta_action = (action_target - defalt_pose)/30.0
+                # defalt_pose = self.agent.robot.get_qpos()[0, :38].cpu().numpy()
+                # delta_action = (action_target - defalt_pose)/30.0
                 for j in range(20):
-                    defalt_pose = defalt_pose + delta_action
+                    # defalt_pose = defalt_pose + delta_action
                     obs, reward, terminated, truncated, info = self.step(action_target)
                     self.render()
                 # all_state.append(self.agent.robot.get_qpos()[0, :38].cpu().numpy()[0:4])
@@ -804,30 +761,11 @@ class TableSetting(TableEnv):
                 if k != len(actions)-1:
                     observation = self.get_obs_now()
 
-                    # with open(str(ROOT_PATH/f'datasets/dual_bottles_pick_easy_20250506_235755_pkl/episode2/{i*6+k+1}.pkl'), 'rb') as file:
-                    #     data = pickle.load(file)
-                    # obs['agent_pos'] = data['joint_state']
-                    # obs['point_cloud'] = data['pointcloud'][:,:]
-
                     obs = dict()
                     obs['point_cloud'] = observation['pointcloud']
                     obs['agent_pos'] = observation['joint_state']
                     model.update_obs(obs)
 
-            # for i in range(len(actions)):
-            #     defalt_pose = self.agent.robot.get_qpos()[0, :38].cpu().numpy()
-            #     defalt_pose_low = self.qpos_to_action(defalt_pose)
-            #     action_target = actions[i]
-            #     all_actions.append(action_target)
-            #     all_state.append(defalt_pose_low)
-            #     action_target = self.action_to_qpos(action_target)
-            #     delta_action = (action_target - defalt_pose)/10
-            #     # obs, reward, terminated, truncated, info = self.step(action_target)
-            #     for j in range(10):
-            #         defalt_pose = defalt_pose + delta_action
-            #         # print("action_target:",action_target)
-            #         obs, reward, terminated, truncated, info = self.step(action_target)
-            #         self.render()
             
             if self.check_success():
                 run_sccess=True
@@ -1062,71 +1000,19 @@ class TableSetting(TableEnv):
             # if self.data_type.get('rgb', False):
             front_rgba = self._get_camera_rgba(self.front_camera)
             head_rgba = self._get_camera_rgba(self.head_camera)
-            # left_rgba = self._get_camera_rgba(self.left_camera)
-            # right_rgba = self._get_camera_rgba(self.right_camera)
 
-                # if self.save_type.get('raw_data', True):
-                #     if self.data_type.get('observer', False):
-                #         observer_rgba = self._get_camera_rgba(self.observer_camera)
-                #         save_img(self.file_path["observer_color"]+f"{self.PCD_INDEX}.png",observer_rgba)
-                #     save_img(self.file_path["t_color"]+f"{self.PCD_INDEX}.png",head_rgba)
-                #     save_img(self.file_path["f_color"]+f"{self.PCD_INDEX}.png",front_rgba)
-                #     save_img(self.file_path["l_color"]+f"{self.PCD_INDEX}.png",left_rgba)
-                #     save_img(self.file_path["r_color"]+f"{self.PCD_INDEX}.png",right_rgba)
-
-                # if self.save_type.get('pkl' , True):
-            # if self.data_type.get('observer', False):
-                # observer_rgba = self._get_camera_rgba(self.observer_camera)
-                # pkl_dic["observation"]["observer_camera"] = {"rgb": observer_rgba[:,:,:3]}
-            # pkl_dic["observation"]["head_camera"]["rgb"] = head_rgba[:,:,:3]
             pkl_dic["observation"]["head_camera"]["rgb"] = np.squeeze(head_rgba)[:,:,:3]   #[1,..,H, W, 4] -> [H, W, 3]
-            # pkl_dic["observation"]["front_camera"]["rgb"] = np.squeeze(front_rgba)[:,:,:3]
-            # pkl_dic["observation"]["left_camera"]["rgb"] = left_rgba[:,:,:3]
-            # pkl_dic["observation"]["right_camera"]["rgb"] = right_rgba[:,:,:3]
 
-            # # ---------------------------------------------------------------------------- #
-            # # DEPTH
-            # # ---------------------------------------------------------------------------- #
-            # if self.data_type.get('depth', False):
             front_depth = self._get_camera_depth(self.front_camera)
             head_depth = self._get_camera_depth(self.head_camera)
-            # left_depth = self._get_camera_depth(self.left_camera)
-            # right_depth = self._get_camera_depth(self.right_camera)
-                
-            # if self.save_type.get('raw_data', True):
-            #     save_img(self.file_path["t_depth"]+f"{self.PCD_INDEX}.png", head_depth.astype(np.uint16))
-            #     save_img(self.file_path["f_depth"]+f"{self.PCD_INDEX}.png", front_depth.astype(np.uint16))
-            #     save_img(self.file_path["l_depth"]+f"{self.PCD_INDEX}.png", left_depth.astype(np.uint16))
-            #     save_img(self.file_path["r_depth"]+f"{self.PCD_INDEX}.png", right_depth.astype(np.uint16))
-            # if self.save_type.get('pkl' , True):
-            # pkl_dic["observation"]["head_camera"]["depth"] = np.squeeze(head_depth) # [H,W]
-            # pkl_dic["observation"]["front_camera"]["depth"] = np.squeeze(front_depth)
-                # pkl_dic["observation"]["left_camera"]["depth"] = left_depth
-                # pkl_dic["observation"]["right_camera"]["depth"] = right_depth
 
-            # # ---------------------------------------------------------------------------- #
-            # # JointState JSON
-            # # ---------------------------------------------------------------------------- #
-            # if self.data_type.get('qpos', False):
             jointstate = {
                 "effort" : [ 0, 0, 0, 0, 0, 0, 0 ],
                 "position" : self.qpos_to_action(self.agent.robot.get_qpos()[0, :38].cpu().numpy()),
                 "velocity" : [ 0, 0, 0, 0, 0, 0, 0 ]
             }
-            # right_jointstate = {
-            #     "effort" : [ 0, 0, 0, 0, 0, 0, 0 ],
-            #     "position" : self.get_right_arm_jointState(),
-            #     "velocity" : [ 0, 0, 0, 0, 0, 0, 0 ]
-            # }
 
-            # if self.save_type.get('raw_data', True):
-            #     save_json(self.file_path["ml_joint"]+f"{self.PCD_INDEX}.json", left_jointstate)
-            #     save_json(self.file_path["pl_joint"]+f"{self.PCD_INDEX}.json", left_jointstate)
-            #     save_json(self.file_path["mr_joint"]+f"{self.PCD_INDEX}.json", right_jointstate)
-            #     save_json(self.file_path["pr_joint"]+f"{self.PCD_INDEX}.json", right_jointstate)
 
-            # if self.save_type.get('pkl' , True):
-                # if self.dual_arm:
             pkl_dic["joint_state"] = np.array(jointstate["position"])
                 # else:
                     # pkl_dic["joint_action"] = np.array(right_jointstate["position"])
@@ -1141,36 +1027,19 @@ class TableSetting(TableEnv):
                 "position" : self.qpos_to_action(self.last_record_action),
                 "velocity" : [ 0, 0, 0, 0, 0, 0, 0 ]
             }
-            # right_jointstate = {
-            #     "effort" : [ 0, 0, 0, 0, 0, 0, 0 ],
-            #     "position" : self.get_right_arm_jointState(),
-            #     "velocity" : [ 0, 0, 0, 0, 0, 0, 0 ]
-            # }
 
-            # if self.save_type.get('raw_data', True):
-            #     save_json(self.file_path["ml_joint"]+f"{self.PCD_INDEX}.json", left_jointstate)
-            #     save_json(self.file_path["pl_joint"]+f"{self.PCD_INDEX}.json", left_jointstate)
-            #     save_json(self.file_path["mr_joint"]+f"{self.PCD_INDEX}.json", right_jointstate)
-            #     save_json(self.file_path["pr_joint"]+f"{self.PCD_INDEX}.json", right_jointstate)
-
-            # if self.save_type.get('pkl' , True):
-                # if self.dual_arm:
             pkl_dic["joint_action"] = np.array(jointaction["position"])
-            # print("action-state:",pkl_dic["joint_action"]-pkl_dic["joint_state"])
-                # else:
-                    # pkl_dic["joint_action"] = np.array(right_jointstate["position"])
+
 
             # # ---------------------------------------------------------------------------- #
             # # PointCloud
             # # ---------------------------------------------------------------------------- #
-            # if self.data_type.get('pointcloud', False):
             head_pcd = self._get_camera_pcd(self.head_camera, point_num=0)
             front_pcd = self._get_camera_pcd(self.front_camera, point_num=0)
             # left_pcd = self._get_camera_pcd(self.left_camera, point_num=0)
             # right_pcd = self._get_camera_pcd(self.right_camera, point_num=0) 
 
             # Merge pointcloud
-            # if self.data_type.get("conbine", False):
             conbine_pcd = np.vstack((head_pcd, front_pcd))
             # else:
                 # conbine_pcd = head_pcd
@@ -1181,16 +1050,7 @@ class TableSetting(TableEnv):
                 # shape: (501422, 6)-> (pcd_down_sample_num, 6)
                 pcd_array,index = fps(conbine_pcd[:,:3],self.pcd_down_sample_num)
                 index = index.detach().cpu().numpy()[0]
-            # if self.save_type.get('raw_data', True):
-            # ensure_dir(self.file_path["t_pcd"] + f"{self.PCD_INDEX}.pcd")
-            # o3d.io.write_point_cloud(self.file_path["t_pcd"] + f"{self.PCD_INDEX}.pcd", self.arr2pcd(head_pcd[:,:3], head_pcd[:,3:])) 
-            # ensure_dir(self.file_path["f_pcd"] + f"{self.PCD_INDEX}.pcd")
-            # o3d.io.write_point_cloud(self.file_path["f_pcd"] + f"{self.PCD_INDEX}.pcd", self.arr2pcd(front_pcd[:,:3], front_pcd[:,3:]))
-            # if self.data_type.get("conbine", False):
-            #     ensure_dir(self.file_path["conbine_pcd"] + f"{self.PCD_INDEX}.pcd")
-            #     o3d.io.write_point_cloud(self.file_path["conbine_pcd"] + f"{self.PCD_INDEX}.pcd", self.arr2pcd(pcd_array, conbine_pcd[index,3:]))
 
-            # if self.save_type.get('pkl' , True):
             pkl_dic["pointcloud"] = conbine_pcd[index]
             save_pkl(self.file_path["pkl"]+f"{self.PCD_INDEX}.pkl", pkl_dic)
 
@@ -1214,20 +1074,13 @@ class TableSetting(TableEnv):
             setattr(self, type_name, [])
         objs=getattr(self, type_name)
         objs.append(self._build_actor_helper(type_name=type_name,obj_id=type_id,scale=self.scene_scale))
-        # if "articulated" in self.assets_info[type_name][type_id]:
-        #     articulated_type_name = f"{type_name}_articulated"
-        #     if not hasattr(self, articulated_type_name):
-        #         setattr(self, articulated_type_name, [])
-            # self.articulator = objs[-1]
-            # self.articulator_id[type_name] = [link.id for link in objs[-1].get_links()]
-        # update actor count
+
         if type_name not in self.actor_count:
             self.actor_count[type_name]=0
         self.actor_count[type_name]+=1
         self.total_actor_count+=1
         print(f"Added actor of type '{type_name}'. Total for this type: {self.actor_count[type_name]}. Total actors: {self.total_actor_count}.")
 
-    # 获取所有物体的位置信息
     def get_actors_info(self):
         actors_info = {}
         for type_name, count in self.actor_count.items():
@@ -1244,12 +1097,10 @@ class TableSetting(TableEnv):
                 if isinstance(q_raw[0], list):
                     q_raw = q_raw[0]
 
-                # 提取位置向量和四元数，并限制小数点位数
-                p = [round(float(coord), 3) for coord in p_raw]  # 确保每个元素是 float
-                q = [round(float(coord), 3) for coord in q_raw]  # 确保每个元素是 float
+                p = [round(float(coord), 3) for coord in p_raw]  # 
+                q = [round(float(coord), 3) for coord in q_raw]  #
                 poses.append({"p": p, "q": q})
                 
-            # 将 type_name、count 和 pose 信息存储到 actors_info 中
             actors_info[type_name] = {
                 "count": count,
                 "poses": poses
@@ -1287,19 +1138,7 @@ class TableSetting(TableEnv):
         p = [round(float(coord), 3) for coord in p_raw]  # 确保每个元素是 float
         q = [round(float(coord), 3) for coord in q_raw]  # 确保每个元素是 float        
         robot_info_prompt["r_hand_base_link"]={"p": p, "q": q}
-        # robot_info["qpose"] = self.agent.robot.pose
-        # # 检查并解包 pose.p 和 pose.q
-        # p_raw = robot_info["pose"].p.numpy().tolist()
-        # q_raw = robot_info["pose"].q.numpy().tolist()
 
-        # # 如果 p_raw 或 q_raw 是嵌套列表，解包第一个元素
-        # if isinstance(p_raw[0], list):
-        #     p_raw = p_raw[0]
-        # if isinstance(q_raw[0], list):
-        #     q_raw = q_raw[0]
-
-        # # 提取位置向量和四元数，并限制小数点位数
-        # p = [round(float(coord), 3) for coord in p_raw]
         return robot_info_all, robot_info_prompt
     
 
@@ -1321,10 +1160,7 @@ class TableSetting(TableEnv):
         else:
             num_id=len(getattr(self, type_name))
         obj_name=f"{type_name}_{num_id}"
-        # print("type(asset_info)",type(asset_info))
-        # print("asset_info",asset_info)
-        # print("scale" in asset_info)
-        
+
         if "scale" in asset_info:
             if isinstance(asset_info["scale"], list):
                 obj_scale=asset_info["scale"]
@@ -1376,15 +1212,7 @@ class TableSetting(TableEnv):
                     pose=fix_rotation_pose,
                 )
                 builder.initial_pose = sapien.Pose(p=[0, 0, 0])
-                # if type_name=="apple":
-                #     # builder.initial_pose = sapien.Pose(p=[0, -0.4, 0.753])
-                #     builder.initial_pose = sapien.Pose(p=[0, 0, 0])
 
-                # elif type_name=="bowl":
-                #     # builder.initial_pose = sapien.Pose(p=[0, -0.4, 0.78])
-                #     builder.initial_pose = sapien.Pose(p=[0, 0, 0])
-
-                # builder.initial_pose = initial_pose
                 if asset_info["kinematic"]:
                     actor = builder.build_kinematic(name=obj_name)
                 else:
@@ -1432,12 +1260,7 @@ class TableSetting(TableEnv):
             )
             builder.add_visual_from_file(str(visual_file), scale=np.array([scale*obj_scale] * 3))
             instance = builder.build(name=obj_name)
-            # loader: sapien.URDFLoader = self.scene.create_urdf_loader()
-            # loader.scale =obj_scale
-            # instance: sapien.Articulation = loader.load(
-                # urdf_path, config={"density": 100}
-                # urdf_path
-            # )
+
             actor = instance
 
         elif asset_info["dataset"]=="local_urdf":
@@ -1446,9 +1269,7 @@ class TableSetting(TableEnv):
             # 2. set the loader parameters
             loader.load_multiple_collisions_from_file = True
 
-            # loader.multiple_collisions_decomposition = "coacd"
-            # builder.fix_root_link = True
-            # builder.initial_pose = sapien.Pose(p=[0, 0, 0])
+
             urdf_path = str(
                 HGENSIM_ASSET_DIR / "objects/articulated_objs" / asset_info["file_name"] / "mobility.urdf"
             )
@@ -1456,17 +1277,10 @@ class TableSetting(TableEnv):
                 HGENSIM_ASSET_DIR / "objects/articulated_objs" / asset_info["file_name"]/ "info.json"
             )
             info = json.load(open(keypoint_path))
-            # if isinstance(obj_scale,list):
-            #     loader.scale =np.array(obj_scale)
-            # else:
-            #     loader.scale =obj_scale
+
             loader.scale =obj_scale
             loader.density = 10
 
-            # if "box" in asset_info["file_name"]:
-            #     loader.density = 0.001
-            # elif "laptop" in asset_info["file_name"]:
-            #     loader.density = 0.00001
 
             instance: sapien.Articulation = loader.load(
                 # urdf_path, config={"density": 100}
@@ -1501,17 +1315,9 @@ class TableSetting(TableEnv):
                 close_qpos=joint_position_range[0],
                 # tcp_link=self.tcp,
             )
-            # self.articulator = obj
-            # self.articulator_id[obj_name] = [link.id for link in instance.get_links()]
+
             actor=obj
-            
-            # objects_dir = HGENSIM_ASSET_DIR / "objects" / "custom"/ asset_info["file_name"]
-            # builder: sapien.URDFLoader = self.scene.create_urdf_loader()
-            # builder.name=obj_name
-            # builder.scale=obj_scale
-            # builder.fix_root_link = True
-            # builder.initial_pose = sapien.Pose(p=[0, 0, 0])
-            # actor: sapien.Articulation = builder.load(str(objects_dir),name=obj_name)
+
 
         elif asset_info["dataset"]=="bridge":
             # density = self.bridge_model_db[asset_info["model_id"]].get("density", 1000)
@@ -1584,97 +1390,8 @@ class TableSetting(TableEnv):
         else:
             print("")
             return -1
-        # print(initial_pose)
-        # actor.set_pose(initial_pose)
         return actor
-        # builder = self.scene.create_actor_builder()
-        # if asset_info["dataset"]=="local":
-        #     fix_rotation_pose = sapien.Pose(q=euler2quat(np.pi / 2, 0, 0))
-        #     model_dir = os.path.dirname(__file__) + "/assets"
-        #     if asset_info["collision_type"]=="convex":
-        #         builder.add_multiple_convex_collisions_from_file(
-        #             filename=os.path.join(model_dir, asset_info["collision_file"]),
-        #             pose=fix_rotation_pose,
-        #             scale=[scale*asset_info["scale"]] * 3,
-        #         )
-        #     elif asset_info["collision_type"]=="nonconvex":
-        #         builder.add_nonconvex_collision_from_file(
-        #             filename=os.path.join(model_dir, asset_info["collision_file"]),
-        #             pose=fix_rotation_pose,
-        #             scale=[scale*asset_info["scale"]] * 3,
-        #         )
-        #     # builder.add_nonconvex_collision_from_file(
-        #     #     filename=os.path.join(model_dir, "frl_apartment_bowl_07.ply"),
-        #     #     pose=fix_rotation_pose,
-        #     #     scale=[scale] * 3,
-        #     # )
-        #     builder.add_visual_from_file(
-        #         filename=os.path.join(model_dir, "frl_apartment_bowl_07.glb"),
-        #         scale=[scale] * 3,
-        #         pose=fix_rotation_pose,
-        #     )
-        #     builder.initial_pose = sapien.Pose(p=[0, -0.4, 0.753])
-        #     return builder.build_kinematic(name="bowl")
-
-        # builder = self.scene.create_actor_builder()
-        # model_dir = os.path.dirname(__file__) + "/assets"
-        # builder.add_multiple_convex_collisions_from_file(
-        #     filename=os.path.join(model_dir, "apple_1.ply"),
-        #     pose=fix_rotation_pose,
-        #     scale=[scale * 0.8]
-        #     * 3,  # scale down more to make apple a bit smaller to be graspable
-        # )
-        # builder.add_visual_from_file(
-        #     filename=os.path.join(model_dir, "apple_1.glb"),
-        #     scale=[scale * 0.8] * 3,
-        #     pose=fix_rotation_pose,
-        # )
-        # builder.initial_pose = sapien.Pose(p=[0, -0.4, 0.78])
-        # # builder.mass = 100
-        # self.apple = builder.build(name="apple")
-
-    # def _load_scene(self, options: Dict):
-    #     super()._load_scene(options)
-    #     scale = self.kitchen_scene_scale
-
-    #     self.bowl = self._build_actor_helper(type_name="bowl", scale=scale,initial_pose=sapien.Pose(p=[0, -0.4, 0.753],q=euler2quat(np.pi / 2, 0, 0)))
-    #     self.apple = self._build_actor_helper(type_name="apple", scale=scale,initial_pose=sapien.Pose(p=[0, -0.4, 0.78],q=euler2quat(np.pi / 2, 0, 0)))
-    #     # Pose()
-    #     # self.can = self._build_actor_helper(type_name="can", scale=scale,initial_pose=sapien.Pose([3.95881, -2.24357, 0.950287], [0.564564, -0.355759, 0.472883, 0.5754]))
-    #     self.can = self._build_actor_helper(type_name="can", scale=scale,initial_pose=sapien.Pose([3.85881, -2.04357, 0.950287], [0.564564, -0.355759, 0.472883, 0.5754]))
-        # self._build_actor_helper("apple", scale=scale,initial_pose=sapien.Pose(p=[0, -0.4, 0.78],q=euler2quat(np.pi / 2, 0, 0)))
-        # builder = self.scene.create_actor_builder()
-        # fix_rotation_pose = sapien.Pose(q=euler2quat(np.pi / 2, 0, 0))
-        # model_dir = os.path.dirname(__file__) + "/assets"
-        # builder.add_nonconvex_collision_from_file(
-        #     filename=os.path.join(model_dir, "frl_apartment_bowl_07.ply"),
-        #     pose=fix_rotation_pose,
-        #     scale=[scale] * 3,
-        # )
-        # builder.add_visual_from_file(
-        #     filename=os.path.join(model_dir, "frl_apartment_bowl_07.glb"),
-        #     scale=[scale] * 3,
-        #     pose=fix_rotation_pose,
-        # )
-        # builder.initial_pose = sapien.Pose(p=[0, -0.4, 0.753])
-        # self.bowl = builder.build_kinematic(name="bowl")
-
-        # builder = self.scene.create_actor_builder()
-        # model_dir = os.path.dirname(__file__) + "/assets"
-        # builder.add_multiple_convex_collisions_from_file(
-        #     filename=os.path.join(model_dir, "apple_1.ply"),
-        #     pose=fix_rotation_pose,
-        #     scale=[scale * 0.8]
-        #     * 3,  # scale down more to make apple a bit smaller to be graspable
-        # )
-        # builder.add_visual_from_file(
-        #     filename=os.path.join(model_dir, "apple_1.glb"),
-        #     scale=[scale * 0.8] * 3,
-        #     pose=fix_rotation_pose,
-        # )
-        # builder.initial_pose = sapien.Pose(p=[0, -0.4, 0.78])
-        # # builder.mass = 100
-        # self.apple = builder.build(name="apple")
+       
 
 
 
@@ -1696,7 +1413,6 @@ class TableSetting(TableEnv):
     ):
         return self.compute_dense_reward(obs=obs, action=action, info=info) / 10
     
-    # 初始化场景的时候传入物体姿态能随机化
     def get_random_pose(self,default_pose,random_angle=None,default_angle=None,random_range=None):        
         if self.use_env_setting:
             if self.use_random_range:
@@ -1739,11 +1455,7 @@ class TableSetting(TableEnv):
             # quaternion_wxyz = np.array([quaternion_xyzw[3], quaternion_xyzw[0], quaternion_xyzw[1], quaternion_xyzw[2]])
             set_pose_q = pose.q.copy()
             set_pose_q = np.array([set_pose_q[1], set_pose_q[2], set_pose_q[3],set_pose_q[0]])
-            # random_q = (random_rotation * Rotation.from_quat(pose.q)).as_quat()  # Combine random rotation with original orientation
-            # random_q = (Rotation.from_quat(pose.q)*random_rotation).as_quat()  # Combine random rotation with original orientation
-            # self frame
-            # random_q = (Rotation.from_quat(set_pose_q*random_rotation)).as_quat()  # Combine random rotation with original orientation
-            # world frame
+
             random_q = (random_rotation*Rotation.from_quat(set_pose_q)).as_quat()  # Combine random rotation with original orientation
             # random_q = (Rotation.from_quat(quaternion_wxyz)).as_quat()  # Combine random rotation with original orientation
             random_q = np.array([random_q[3],random_q[0],random_q[1], random_q[2]])
