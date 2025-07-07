@@ -202,11 +202,11 @@ This codebase is under [CC BY-NC 4.0 license](https://creativecommons.org/licens
 
 ## Acknowledgements
 
-* [DeepSeek-Prover-V1.5](vscode-file://vscode-app/usr/share/code/resources/app/out/vs/code/electron-sandbox/workbench/workbench.html): We referred to its MCTS module.
-* [ManiSkill](vscode-file://vscode-app/usr/share/code/resources/app/out/vs/code/electron-sandbox/workbench/workbench.html): Used as the simulation platform.
-* [Unitree](vscode-file://vscode-app/usr/share/code/resources/app/out/vs/code/electron-sandbox/workbench/workbench.html): We use the Unitree H1\_2 as our robot.
-* [Gensim2](vscode-file://vscode-app/usr/share/code/resources/app/out/vs/code/electron-sandbox/workbench/workbench.html): We referred to its constraints module.
-* [RoboTwin](vscode-file://vscode-app/usr/share/code/resources/app/out/vs/code/electron-sandbox/workbench/workbench.html): We referred to its DP and DP3 modules.
+* [DeepSeek-Prover-V1.5](https://github.com/deepseek-ai/DeepSeek-Prover-V1.5): We referred to its MCTS module.
+* [ManiSkill](https://github.com/haosulab/ManiSkill): Used as the simulation platform.
+* [Unitree](https://www.unitree.com/): We use the Unitree H1\_2 as our robot.
+* [Gensim2](https://github.com/GenSim2/gensim2): We referred to its constraints module.
+* [RoboTwin](https://github.com/TianxingChen/RoboTwin): We referred to its DP and DP3 modules.
 
 ## 📬 **Contact**
 
