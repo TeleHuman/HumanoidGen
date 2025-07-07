@@ -200,6 +200,14 @@ If you find our work helpful, please cite:
 
 This codebase is under [CC BY-NC 4.0 license](https://creativecommons.org/licenses/by-nc/4.0/deed.en). You may not use the material for commercial purposes, e.g., to make demos to advertise your commercial products.
 
+## Acknowledgements
+
+* [DeepSeek-Prover-V1.5](vscode-file://vscode-app/usr/share/code/resources/app/out/vs/code/electron-sandbox/workbench/workbench.html): We referred to its MCTS module.
+* [ManiSkill](vscode-file://vscode-app/usr/share/code/resources/app/out/vs/code/electron-sandbox/workbench/workbench.html): Used as the simulation platform.
+* [Unitree](vscode-file://vscode-app/usr/share/code/resources/app/out/vs/code/electron-sandbox/workbench/workbench.html): We use the Unitree H1\_2 as our robot.
+* [Gensim2](vscode-file://vscode-app/usr/share/code/resources/app/out/vs/code/electron-sandbox/workbench/workbench.html): We referred to its constraints module.
+* [RoboTwin](vscode-file://vscode-app/usr/share/code/resources/app/out/vs/code/electron-sandbox/workbench/workbench.html): We referred to its DP and DP3 modules.
+
 ## 📬 **Contact**
 
 **Feel free to contact us!**
