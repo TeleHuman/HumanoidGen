@@ -190,7 +190,7 @@ If you find our work helpful, please cite:
 ```bibtex
 @article{jing2025humanoidgen,
   title={HumanoidGen: Data Generation for Bimanual Dexterous Manipulation via LLM Reasoning},
-  author={Zhi Jing, Siyuan Yang, Jicong Ao, Ting Xiao, Yugang Jiang, Chenjia Bai},
+  author={Jing, Zhi and Yang, Siyuan and Ao, Jicong and Xiao, Ting and Jiang, Yugang and Bai, Chenjia},
   journal={arXiv preprint arXiv:2507.00833},
   year={2025}
 }
@@ -214,4 +214,3 @@ This codebase is under [CC BY-NC 4.0 license](https://creativecommons.org/licens
 
 - Zhi Jing: [jingzhi2021@qq.com](mailto:jingzhi2021@qq.com) or WeChat `JZhi2024`
 - Chenjia Bai (Corresponding Author): [baicj@chinatelecom.cn](mailto:baicj@chinatelecom.cn)
-
