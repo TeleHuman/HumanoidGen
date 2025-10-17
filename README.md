@@ -3,14 +3,14 @@
 <div align="center">
 <p align="center">
 <a href="https://github.com/jingzhi-git" target="_blank" style="color:black">Zhi Jing</a><sup>1,2</sup>,
-<a href="#" target="_blank" style="color:black">Siyuan Yang</a><sup>1,3</sup>,
-<a href="https://github.com/ProNeverFake" target="_blank" style="color:black">Jicong Ao</a><sup>1</sup>,
+<a href="#" target="_blank" style="color:black">Siyuan Yang</a><sup>3,2</sup>,
+<a href="https://github.com/ProNeverFake" target="_blank" style="color:black">Jicong Ao</a><sup>2</sup>,
 <a href="#" target="_blank" style="color:black">Ting Xiao</a><sup>4</sup>,
-<a href="#" target="_blank" style="color:black">Yugang Jiang</a><sup>2</sup>,
-<a href="https://baichenjia.github.io/" target="_blank" style="color:black">Chenjia Bai</a><sup>✉ 1</sup>
+<a href="#" target="_blank" style="color:black">Yugang Jiang</a><sup>1</sup>,
+<a href="https://baichenjia.github.io/" target="_blank" style="color:black">Chenjia Bai</a><sup>✉ 2</sup>
 <br>
-<sup>1</sup>Institute of Artificial Intelligence (TeleAI), China Telecom <sup>†</sup>
-<sup>2</sup>Fudan University <sup>†</sup>
+<sup>1</sup>Fudan University <sup>†</sup>
+<sup>2</sup>Institute of Artificial Intelligence (TeleAI), China Telecom <sup>†</sup>
 <br>
 <sup>3</sup>University of Science and Technology of China
 <sup>4</sup>East China University of Science and Technology
@@ -28,6 +28,10 @@
 <img src="./web/main_pipline.png"/>
 
 </div>
+
+## 🔥 Updates
+
+[2025-09-18] 🔥🔥🔥 HumanoidGen gets accepted to NeurIPS 2025!
 
 ## ⚙️ **Setup Environment**
 
