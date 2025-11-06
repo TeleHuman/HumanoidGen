@@ -21,17 +21,18 @@
 </p>
 
 [🔥 Homepage](https://openhumanoidgen.github.io/)
-[📄 Paper](https://arxiv.org/abs/2507.00833)
+[📄 Paper](https://openreview.net/pdf/753bcc41dc0fe6dba41a235116449a37aba704f7.pdf)
 [⛁ Dataset](https://huggingface.co/datasets/TeleEmbodied/humanoidgen_dataset/tree/main/task_datasets)
 [🤗 Model](https://huggingface.co/TeleEmbodied/humanoidgen_model/tree/main)
 
 <img src="./web/main_pipline.png"/>
 
+
 </div>
 
 ## 🔥 Updates
 
-[2025-09-18] 🔥🔥🔥 HumanoidGen gets accepted to NeurIPS 2025!
+[2025-09-18] 🔥🔥🔥 HumanoidGen gets accepted to NeurIPS 2025: [Paper](https://openreview.net/pdf/753bcc41dc0fe6dba41a235116449a37aba704f7.pdf)
 
 ## ⚙️ **Setup Environment**
 
